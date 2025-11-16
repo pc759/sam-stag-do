@@ -1,145 +1,82 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/router';
+import Layout from '../components/Layout';
 import styles from '../styles/Home.module.css';
 
 export default function Home() {
-  const [stories, setStories] = useState([]);
-  const [author, setAuthor] = useState('');
-  const [story, setStory] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
+  const router = useRouter();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    fetchStories();
-  }, []);
-
-  const fetchStories = async () => {
-    try {
-      const res = await fetch('/api/stories');
-      const data = await res.json();
-      setStories(data);
-    } catch (error) {
-      console.error('Failed to fetch stories:', error);
-    }
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    if (!author.trim() || !story.trim()) {
-      alert('Come on, fill in both fields. Sam deserves better than this.');
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const res = await fetch('/api/stories', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ author, story }),
-      });
-
-      if (res.ok) {
-        setAuthor('');
-        setStory('');
-        setSubmitted(true);
-        setTimeout(() => setSubmitted(false), 3000);
-        fetchStories();
-      } else {
-        alert('Something went wrong. Try again.');
+    const checkAuth = async () => {
+      try {
+        const res = await fetch('/api/check-auth', { method: 'GET' });
+        if (res.status === 401) {
+          router.push('/login');
+        } else {
+          setIsAuthenticated(true);
+        }
+      } catch (err) {
+        router.push('/login');
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      console.error('Failed to submit story:', error);
-      alert('Failed to submit. Check your connection.');
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
+
+    checkAuth();
+  }, [router]);
+
+  if (isLoading) {
+    return <div className={styles.loading}>Loading...</div>;
+  }
+
+  if (!isAuthenticated) {
+    return null;
+  }
 
   return (
-    <div className={styles.container}>
-      <header className={styles.header}>
-        <h1>🍺 SAM'S STAG DO 🍺</h1>
-        <p className={styles.subtitle}>
-          The Official Repository of Sam's Questionable Life Choices
-        </p>
-      </header>
+    <Layout isAuthenticated={isAuthenticated}>
+      <div className={styles.container}>
+        <div className={styles.hero}>
+          <h1>Welcome to Sam's Stag Do</h1>
+          <p className={styles.tagline}>June/July 2025 • A weekend to remember (or forget)</p>
+        </div>
 
-      <main className={styles.main}>
-        <section className={styles.formSection}>
-          <h2>Spill the Tea ☕</h2>
-          <p className={styles.formDescription}>
-            Got an embarrassing story about Sam? Of course you do. Share it here.
-          </p>
-
-          <form onSubmit={handleSubmit} className={styles.form}>
-            <div className={styles.formGroup}>
-              <label htmlFor="author">Your Name (or Anonymous if you're a coward)</label>
-              <input
-                id="author"
-                type="text"
-                value={author}
-                onChange={(e) => setAuthor(e.target.value)}
-                placeholder="e.g., That One Mate"
-                maxLength="50"
-              />
-            </div>
-
-            <div className={styles.formGroup}>
-              <label htmlFor="story">The Embarrassing Story</label>
-              <textarea
-                id="story"
-                value={story}
-                onChange={(e) => setStory(e.target.value)}
-                placeholder="Tell us about the time Sam did something absolutely ridiculous..."
-                rows="6"
-                maxLength="1000"
-              />
-              <p className={styles.charCount}>{story.length}/1000</p>
-            </div>
-
-            <button 
-              type="submit" 
-              disabled={loading}
-              className={styles.submitBtn}
-            >
-              {loading ? 'Submitting...' : 'Submit This Gem'}
-            </button>
-
-            {submitted && (
-              <p className={styles.successMessage}>
-                ✅ Story submitted! Sam's going to love this...
-              </p>
-            )}
-          </form>
-        </section>
-
-        <section className={styles.storiesSection}>
-          <h2>The Hall of Shame 🏆</h2>
-          <p className={styles.storiesDescription}>
-            {stories.length === 0 
-              ? "No stories yet. Come on, you must have something!" 
-              : `${stories.length} glorious tale${stories.length !== 1 ? 's' : ''} of Sam's chaos`}
-          </p>
-
-          <div className={styles.storiesList}>
-            {stories.map((s) => (
-              <div key={s.id} className={styles.storyCard}>
-                <div className={styles.storyHeader}>
-                  <h3>{s.author}</h3>
-                  <span className={styles.timestamp}>
-                    {new Date(s.created_at).toLocaleDateString()}
-                  </span>
-                </div>
-                <p className={styles.storyText}>{s.story}</p>
-              </div>
-            ))}
+        <div className={styles.grid}>
+          <div className={styles.card}>
+            <div className={styles.cardIcon}>📋</div>
+            <h2>Stag Do Details</h2>
+            <p>Everything you need to know about the weekend. Dates, times, locations, and what to bring.</p>
+            <a href="/details" className={styles.cardLink}>View Details →</a>
           </div>
-        </section>
-      </main>
 
-      <footer className={styles.footer}>
-        <p>Sam's Stag Do © 2025 | Built with questionable judgment</p>
-      </footer>
-    </div>
+          <div className={styles.card}>
+            <div className={styles.cardIcon}>😂</div>
+            <h2>Sam's Questionable Choices</h2>
+            <p>A repository of embarrassing stories, questionable decisions, and moments we'll never let him forget.</p>
+            <a href="/stories" className={styles.cardLink}>Read Stories →</a>
+          </div>
+
+          <div className={styles.card}>
+            <div className={styles.cardIcon}>🤖</div>
+            <h2>Chat with Sam's AI</h2>
+            <p>Coming soon... Ask Sam's AI anything about the stag do, or just have a laugh.</p>
+            <a href="#" className={`${styles.cardLink} ${styles.disabled}`}>Coming Soon</a>
+          </div>
+        </div>
+
+        <div className={styles.section}>
+          <h2>What's This All About?</h2>
+          <p>
+            This is your private hub for all things Sam's Stag Do. Share stories, coordinate plans, and make sure 
+            we've got everything sorted for an epic weekend. What happens here, stays here... mostly.
+          </p>
+          <p>
+            Password protected and not indexed by search engines, so feel free to be as crude and witty as you like!
+          </p>
+        </div>
+      </div>
+    </Layout>
   );
 }

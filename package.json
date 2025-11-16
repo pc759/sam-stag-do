@@ -1,7 +1,7 @@
 {
   "name": "sam-stag-do",
-  "version": "1.0.0",
-  "description": "Sam's stag do website - embarrassing anecdotes edition",
+  "version": "0.1.0",
+  "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",

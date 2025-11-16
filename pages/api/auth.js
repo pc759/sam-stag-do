@@ -7,9 +7,11 @@ export default function handler(req, res) {
 
     if (password === PASSWORD) {
       const expiryDate = new Date(Date.now() + SESSION_DURATION);
+      
+      // For development, use SameSite=Lax instead of Strict
       res.setHeader(
         'Set-Cookie',
-        `auth_token=authenticated; Path=/; HttpOnly; Secure; SameSite=Strict; Expires=${expiryDate.toUTCString()}`
+        `auth_token=authenticated; Path=/; Max-Age=${Math.floor(SESSION_DURATION / 1000)}; SameSite=Lax`
       );
       return res.status(200).json({ success: true });
     }

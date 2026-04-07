@@ -3,7 +3,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(
+    135deg,
+    var(--grad-start) 0%,
+    var(--grad-end) 100%
+  );
   padding: 1rem;
 }
 
@@ -19,7 +23,11 @@
 }
 
 .imageContainer {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(
+    135deg,
+    var(--grad-start) 0%,
+    var(--grad-end) 100%
+  );
   padding: 3rem 2rem;
   display: flex;
   align-items: center;
@@ -27,9 +35,32 @@
   min-height: 250px;
 }
 
+.logoCircleLarge {
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid rgba(45, 74, 62, 0.8);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.45),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+  background: #f5f0e6;
+}
+
+.logoCircleLarge img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 8px;
+  display: block;
+}
+
 .placeholder {
   text-align: center;
-  color: white;
+  color: var(--page-text);
 }
 
 .placeholder span {
@@ -56,13 +87,13 @@
 
 .formContainer h1 {
   margin: 0 0 0.5rem 0;
-  color: #333;
+  color: var(--card-heading);
   font-size: 2rem;
 }
 
 .subtitle {
   margin: 0 0 2rem 0;
-  color: #666;
+  color: var(--card-muted);
   font-style: italic;
 }
 
@@ -73,7 +104,7 @@
 .formGroup label {
   display: block;
   margin-bottom: 0.5rem;
-  color: #333;
+  color: var(--card-body);
   font-weight: 600;
 }
 
@@ -83,14 +114,14 @@
   border: 2px solid #e0e0e0;
   border-radius: 6px;
   font-size: 1rem;
-  transition: all 0.3s ease;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
   box-sizing: border-box;
 }
 
 .formGroup input:focus {
   outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 35%, transparent);
 }
 
 .formGroup input:disabled {
@@ -111,19 +142,23 @@
 .submitBtn {
   width: 100%;
   padding: 0.75rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: linear-gradient(
+    135deg,
+    var(--grad-start) 0%,
+    var(--grad-end) 100%
+  );
+  color: var(--page-text);
   border: none;
   border-radius: 6px;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: opacity 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .submitBtn:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
 }
 
 .submitBtn:disabled {
@@ -133,7 +168,7 @@
 
 .hint {
   text-align: center;
-  color: #999;
+  color: var(--card-muted);
   font-size: 0.85rem;
   margin-top: 1rem;
 }

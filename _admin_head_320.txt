@@ -1,0 +1,320 @@
+   1: import { useEffect, useState } from 'react';
+   2: import dynamic from 'next/dynamic';
+   3: import Link from 'next/link';
+   4: import { useRouter } from 'next/router';
+   5: import Layout from '../components/Layout';
+   6: import ColorField from '../components/ColorField';
+   7: import { useBranding } from '../contexts/BrandingContext';
+   8: import { defaultContent } from '../lib/siteContent';
+   9: import styles from '../styles/Admin.module.css';
+  10: 
+  11: const KittyQuill = dynamic(() => import('../components/KittyQuill'), { ssr: false });
+  12: 
+  13: const TABS = [
+  14: const TABS = [
+  15: { id: 'look', label: 'Look & feel' },
+  16: { id: 'content', label: 'Content' },
+  17: { id: 'people', label: 'People & tags' },
+  18: { id: 'traitors', label: 'Traitors / votes' },
+  19: { id: 'expenses', label: 'Expenses' },
+  20: { id: 'stories', label: 'Stories' },
+  21: { id: 'account', label: 'Account' }
+  22: ];
+  23: 
+  24: export default function Admin() {
+  25:   const router = useRouter();
+  26:   const { refreshBranding } = useBranding();
+  27:   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  28:   const [user, setUser] = useState(null);
+  29:   const [isLoading, setIsLoading] = useState(true);
+  30:   const [content, setContent] = useState({ ...defaultContent });
+  31:   const [stories, setStories] = useState([]);
+  32:   const [users, setUsers] = useState([]);
+  33:   const [tags, setTags] = useState([]);
+  34:   const [status, setStatus] = useState('');
+  35:   const [isSaving, setIsSaving] = useState(false);
+  36:   const [newUser, setNewUser] = useState({ name: '', mobile: '', password: '' });
+  37:   const [newTag, setNewTag] = useState({
+  38:     name: '',
+  39:     icon: '🏷️',
+  40:     badgeColor: '#374151',
+  41:     hiddenFromAttendees: false,
+  42:     photoOverlay: '',
+  43:     traitorChannel: false
+  44:   });
+  45:   const [adminVotes, setAdminVotes] = useState([]);
+  46: const [adminVotes, setAdminVotes] = useState([]);
+  47: const [adminExpenses, setAdminExpenses] = useState([]);
+  48: const [adminBalances, setAdminBalances] = useState([]);
+  49: const [adminPayments, setAdminPayments] = useState([]);
+  50: const [expenseForm, setExpenseForm] = useState({
+  51: title: '',
+  52: notes: '',
+  53: expenseDate: '',
+  54: splits: [{ userId: '', amountPence: '' }]
+  55: });
+  56: const [editingExpenseId, setEditingExpenseId] = useState(null);
+  57: const [paymentForm, setPaymentForm] = useState({
+  58: userId: '',
+  59: expenseId: '',
+  60: amountPence: '',
+  61: paymentDate: '',
+  62: notes: ''
+  63: });
+  64: const [newVoteTitle, setNewVoteTitle] = useState('');
+  65:     if (!router.isReady) return;
+  66:     const t = router.query.tab;
+  67:     if (typeof t === 'string' && TAB_IDS.has(t)) {
+  68:       setActiveTab(t);
+  69:     }
+  70:   }, [router.isReady, router.query.tab]);
+  71: 
+  72:   const selectTab = (id) => {
+  73:     setActiveTab(id);
+  74:     router.replace({ pathname: '/admin', query: { ...router.query, tab: id } }, undefined, {
+  75:       shallow: true
+  76:     });
+  77:   };
+  78: 
+  79:   const onTabKeyDown = (e, index) => {
+  80:     if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+  81:     e.preventDefault();
+  82:     const next =
+  83:       e.key === 'ArrowRight'
+  84:         ? (index + 1) % TABS.length
+  85:         : (index - 1 + TABS.length) % TABS.length;
+  86:     selectTab(TABS[next].id);
+  87:     const el = document.getElementById(`admin-tab-${TABS[next].id}`);
+  88:     el?.focus();
+  89:   };
+  90: 
+  91:   useEffect(() => {
+  92:     const init = async () => {
+  93:       try {
+  94:         const authRes = await fetch('/api/check-auth', { method: 'GET' });
+  95:         if (authRes.status === 401) {
+  96:           router.push('/login');
+  97:           return;
+  98:         }
+  99:         const authData = await authRes.json();
+ 100:         if (!authData.user?.isAdmin) {
+ 101:           router.push('/');
+ 102:           return;
+ 103:         }
+ 104: 
+ 105:         setIsAuthenticated(true);
+ 106:         setUser(authData.user);
+ 107:         await Promise.all([fetchContent(), fetchStories(), fetchUsers(), fetchTags()]);
+ 108: await Promise.all([
+ 109: fetchContent(),
+ 110: fetchStories(),
+ 111: fetchUsers(),
+ 112: fetchTags(),
+ 113: fetchAdminExpenses(),
+ 114: fetchAdminPayments()
+ 115: ]);
+ 116: 
+ 117:   const fetchContent = async () => {
+ 118:     const res = await fetch('/api/site-content');
+ 119:     const data = await res.json();
+ 120:     setContent({ ...defaultContent, ...data });
+ 121:   };
+ 122: 
+ 123:   const fetchStories = async () => {
+ 124:     const res = await fetch('/api/admin/stories');
+ 125:     const data = await res.json();
+ 126:     setStories(data);
+ 127:   };
+ 128: 
+ 129:   const fetchUsers = async () => {
+ 130:     const [usersRes, rosterRes] = await Promise.all([fetch('/api/admin/users'), fetch('/api/roster')]);
+ 131:     const data = await usersRes.json();
+ 132:     const roster = rosterRes.ok ? await rosterRes.json() : [];
+ 133:     setUsers(
+ 134:       data.map((entry) => {
+ 135:         const rosterUser = roster.find((u) => u.id === entry.id);
+ 136:         return { ...entry, tags: rosterUser?.tags || [] };
+ 137:       })
+ 138:     );
+ 139:   };
+ 140: 
+ 141:   const fetchTags = async () => {
+ 142:     const res = await fetch('/api/admin/tags');
+ 143:     const data = await res.json();
+ 144:     setTags(data);
+ 145:   };
+ 146: 
+ 147:   const fetchAdminVotes = async () => {
+ 148: const fetchAdminVotes = async () => {
+ 149: const res = await fetch('/api/admin/votes');
+ 150: if (!res.ok) return;
+ 151: setAdminVotes(await res.json());
+ 152: };
+ 153: 
+ 154: const fetchAdminExpenses = async () => {
+ 155: const res = await fetch('/api/admin/expenses');
+ 156: if (!res.ok) return;
+ 157: const data = await res.json();
+ 158: setAdminExpenses(data.expenses || []);
+ 159: setAdminBalances(data.balances || []);
+ 160: };
+ 161: 
+ 162: const fetchAdminPayments = async () => {
+ 163: const res = await fetch('/api/admin/payments');
+ 164: if (!res.ok) return;
+ 165: setAdminPayments(await res.json());
+ 166: };
+ 167: 
+ 168: const addSplitRow = () => {
+ 169: setExpenseForm((prev) => ({ ...prev, splits: [...prev.splits, { userId: '', amountPence: '' }] }));
+ 170: };
+ 171: 
+ 172: const updateSplitRow = (index, key, value) => {
+ 173: setExpenseForm((prev) => {
+ 174: const nextSplits = prev.splits.map((split, splitIndex) =>
+ 175: splitIndex === index ? { ...split, [key]: value } : split
+ 176: );
+ 177: return { ...prev, splits: nextSplits };
+ 178: });
+ 179: };
+ 180: 
+ 181: const removeSplitRow = (index) => {
+ 182: setExpenseForm((prev) => {
+ 183: if (prev.splits.length <= 1) {
+ 184: return prev;
+ 185: }
+ 186: return { ...prev, splits: prev.splits.filter((_, splitIndex) => splitIndex !== index) };
+ 187: });
+ 188: };
+ 189: 
+ 190: const resetExpenseForm = () => {
+ 191: setExpenseForm({
+ 192: title: '',
+ 193: notes: '',
+ 194: expenseDate: '',
+ 195: splits: [{ userId: '', amountPence: '' }]
+ 196: });
+ 197: setEditingExpenseId(null);
+ 198: };
+ 199: 
+ 200: const startEditExpense = (expense) => {
+ 201: setEditingExpenseId(expense.id);
+ 202: setExpenseForm({
+ 203: title: expense.title || '',
+ 204: notes: expense.notes || '',
+ 205: expenseDate: expense.expense_date ? String(expense.expense_date).slice(0, 10) : '',
+ 206: splits:
+ 207: expense.splits?.map((split) => ({
+ 208: userId: String(split.userId ?? split.user_id ?? ''),
+ 209: amountPence: String(split.amountPence ?? split.amount_pence ?? '')
+ 210: })) || [{ userId: '', amountPence: '' }]
+ 211: });
+ 212: };
+ 213: 
+ 214: const handleSaveExpense = async (e) => {
+ 215: e.preventDefault();
+ 216: setStatus('');
+ 217: 
+ 218: const payload = {
+ 219: id: editingExpenseId,
+ 220: title: expenseForm.title,
+ 221: notes: expenseForm.notes,
+ 222: expenseDate: expenseForm.expenseDate || null,
+ 223: splits: expenseForm.splits.map((split) => ({
+ 224: userId: Number(split.userId),
+ 225: amountPence: Number(split.amountPence)
+ 226: }))
+ 227: };
+ 228: 
+ 229: const isEdit = Boolean(editingExpenseId);
+ 230: const res = await fetch('/api/admin/expenses', {
+ 231: method: isEdit ? 'PATCH' : 'POST',
+ 232: headers: { 'Content-Type': 'application/json' },
+ 233: body: JSON.stringify(payload)
+ 234: });
+ 235: 
+ 236: if (res.ok) {
+ 237: setStatus(isEdit ? 'Expense updated.' : 'Expense created.');
+ 238: resetExpenseForm();
+ 239: await Promise.all([fetchAdminExpenses(), fetchAdminPayments()]);
+ 240: } else {
+ 241: const data = await res.json().catch(() => ({}));
+ 242: setStatus(data.error || 'Failed to save expense.');
+ 243: }
+ 244: };
+ 245: 
+ 246: const handleDeleteExpense = async (expenseId) => {
+ 247: if (!window.confirm('Delete this expense? This is a soft delete.')) {
+ 248: return;
+ 249: }
+ 250: 
+ 251: const res = await fetch(`/api/admin/expenses?id=${expenseId}`, { method: 'DELETE' });
+ 252: if (res.ok) {
+ 253: setStatus('Expense deleted.');
+ 254: if (editingExpenseId === expenseId) {
+ 255: resetExpenseForm();
+ 256: }
+ 257: await Promise.all([fetchAdminExpenses(), fetchAdminPayments()]);
+ 258: } else {
+ 259: setStatus('Failed to delete expense.');
+ 260: }
+ 261: };
+ 262: 
+ 263: const handleCreatePayment = async (e) => {
+ 264: e.preventDefault();
+ 265: setStatus('');
+ 266: const payload = {
+ 267: userId: Number(paymentForm.userId),
+ 268: expenseId: paymentForm.expenseId ? Number(paymentForm.expenseId) : null,
+ 269: amountPence: Number(paymentForm.amountPence),
+ 270: paymentDate: paymentForm.paymentDate || null,
+ 271: notes: paymentForm.notes
+ 272: };
+ 273: 
+ 274: const res = await fetch('/api/admin/payments', {
+ 275: method: 'POST',
+ 276: headers: { 'Content-Type': 'application/json' },
+ 277: body: JSON.stringify(payload)
+ 278: });
+ 279: 
+ 280: if (res.ok) {
+ 281: setStatus('Payment added.');
+ 282: setPaymentForm({ userId: '', expenseId: '', amountPence: '', paymentDate: '', notes: '' });
+ 283: await Promise.all([fetchAdminExpenses(), fetchAdminPayments()]);
+ 284: } else {
+ 285: const data = await res.json().catch(() => ({}));
+ 286: setStatus(data.error || 'Failed to add payment.');
+ 287: }
+ 288: };
+ 289: 
+ 290: const handleDeletePayment = async (paymentId) => {
+ 291: if (!window.confirm('Delete this payment? This is a soft delete.')) {
+ 292: return;
+ 293: }
+ 294: 
+ 295: const res = await fetch(`/api/admin/payments?id=${paymentId}`, { method: 'DELETE' });
+ 296: if (res.ok) {
+ 297: setStatus('Payment deleted.');
+ 298: await Promise.all([fetchAdminExpenses(), fetchAdminPayments()]);
+ 299: } else {
+ 300: setStatus('Failed to delete payment.');
+ 301: }
+ 302: };
+ 303:   const patchTag = async (tagId, partial) => {
+ 304:     const res = await fetch('/api/admin/tags', {
+ 305:       method: 'PATCH',
+ 306:       headers: { 'Content-Type': 'application/json' },
+ 307:       body: JSON.stringify({ id: tagId, ...partial })
+ 308:     });
+ 309:     if (res.ok) {
+ 310:       fetchTags();
+ 311:       fetchRosterUsers();
+ 312:       setStatus('Tag updated.');
+ 313:     }
+ 314:   };
+ 315: 
+ 316:   const handleSaveContent = async (e) => {
+ 317:     e.preventDefault();
+ 318:     setIsSaving(true);
+ 319:     setStatus('');
+ 320: 

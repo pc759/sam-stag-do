@@ -1,0 +1,249 @@
+.container {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  color: var(--page-text);
+}
+
+.container h1 {
+  color: var(--page-text);
+}
+
+.intro {
+  color: var(--page-text-muted);
+  margin-top: 0;
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  text-align: center;
+  padding: 2rem;
+  background: linear-gradient(135deg, var(--grad-start) 0%, var(--grad-end) 100%);
+  color: var(--page-text);
+  font-size: 1.25rem;
+}
+
+.list {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0 0;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.cardLink {
+  display: block;
+  padding: 1rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: #fff;
+  text-decoration: none;
+  color: var(--card-body);
+  box-shadow: 0 4px 14px rgba(17, 24, 39, 0.06);
+}
+
+.cardLink:hover {
+  border-color: #c7d2fe;
+}
+
+.cardMeta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--card-muted);
+}
+
+.statusOpen {
+  color: #166534;
+  font-weight: 600;
+}
+
+.statusClosed {
+  color: var(--card-muted);
+}
+
+.pendingPanel {
+  margin: 1.25rem 0;
+  padding: 1.25rem;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border: 1px solid #f59e0b;
+  color: #78350f;
+}
+
+.pendingPanel h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1.1rem;
+}
+
+.pendingPanel p {
+  margin: 0;
+  line-height: 1.45;
+}
+
+/* Light surface: voting UI uses white cards; typography here is decoupled from --page-text (dark page header). */
+.voteFormPanel {
+  margin-top: 0.75rem;
+  padding: 1.25rem 1rem 1.5rem;
+  border-radius: 16px;
+  background: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+  color: #374151;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.voteFormIntro {
+  margin: 0 0 0.25rem;
+  color: #4b5563;
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+
+.voteFormPanel .myVote {
+  color: #6b7280;
+}
+
+.candidates {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
+  gap: 0.75rem;
+  margin: 1rem 0;
+}
+
+.choice {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  margin: 0;
+  padding: 0.75rem 0.6rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 14px;
+  cursor: pointer;
+  background: #f9fafb;
+  text-align: center;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.12s ease;
+  box-shadow: 0 2px 8px rgba(17, 24, 39, 0.05);
+  color: #111827;
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+}
+
+.choice:hover {
+  border-color: #c7d2fe;
+}
+
+.choice:focus-within {
+  outline: 2px solid #1d4ed8;
+  outline-offset: 2px;
+}
+
+.choiceSelected {
+  border-color: #1d4ed8;
+  background: linear-gradient(180deg, #eff6ff 0%, #fff 55%);
+  box-shadow: 0 4px 16px rgba(29, 78, 216, 0.15);
+}
+
+.choiceRadio {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  pointer-events: none;
+}
+
+.choiceVisual {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.choiceAvatarImg,
+.choiceAvatarFallback {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 2px solid #e5e7eb;
+}
+
+.choiceSelected .choiceAvatarImg,
+.choiceSelected .choiceAvatarFallback {
+  border-color: #1d4ed8;
+}
+
+.choiceAvatarFallback {
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+  color: #3730a3;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.choiceName {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #111827;
+  line-height: 1.3;
+  word-break: break-word;
+  letter-spacing: 0.01em;
+}
+
+.submitBtn {
+  margin-top: 0.75rem;
+  padding: 0.55rem 1rem;
+  background: #111827;
+  color: #fff;
+  border: 0;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.submitBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.results {
+  margin-top: 1rem;
+}
+
+.resultRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.back {
+  display: inline-block;
+  margin-bottom: 1rem;
+  color: #1d4ed8;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.back:hover {
+  text-decoration: underline;
+}
+
+.myVote {
+  font-size: 0.9rem;
+  color: var(--card-muted);
+  margin-top: 0.75rem;
+}

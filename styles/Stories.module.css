@@ -18,20 +18,24 @@
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: linear-gradient(
+    135deg,
+    var(--grad-start) 0%,
+    var(--grad-end) 100%
+  );
+  color: var(--page-text);
   font-size: 1.5rem;
 }
 
 .container h1 {
-  color: white;
+  color: var(--page-text);
   font-size: 2.5rem;
   margin: 0 0 0.5rem 0;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .subtitle {
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--page-text-muted);
   font-size: 1.1rem;
   margin: 0 0 2rem 0;
 }
@@ -46,9 +50,9 @@
 
 .formSection h2 {
   margin-top: 0;
-  color: #333;
+  color: var(--card-heading);
   font-size: 1.5rem;
-  border-bottom: 3px solid #667eea;
+  border-bottom: 3px solid var(--accent);
   padding-bottom: 1rem;
 }
 
@@ -65,7 +69,7 @@
 
 .formGroup label {
   margin-bottom: 0.5rem;
-  color: #333;
+  color: var(--card-body);
   font-weight: 600;
 }
 
@@ -82,8 +86,8 @@
 .formGroup input:focus,
 .formGroup textarea:focus {
   outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent);
 }
 
 .formGroup input:disabled,
@@ -113,8 +117,12 @@
 
 .submitBtn {
   padding: 0.75rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: linear-gradient(
+    135deg,
+    var(--grad-start) 0%,
+    var(--grad-end) 100%
+  );
+  color: var(--page-text);
   border: none;
   border-radius: 6px;
   font-size: 1rem;
@@ -125,7 +133,7 @@
 
 .submitBtn:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 10px 20px color-mix(in srgb, var(--accent) 35%, transparent);
 }
 
 .submitBtn:disabled {
@@ -142,9 +150,9 @@
 
 .storiesSection h2 {
   margin-top: 0;
-  color: #333;
+  color: var(--card-heading);
   font-size: 1.5rem;
-  border-bottom: 3px solid #667eea;
+  border-bottom: 3px solid var(--accent);
   padding-bottom: 1rem;
 }
 
@@ -161,7 +169,7 @@
 }
 
 .storyCard {
-  border-left: 4px solid #667eea;
+  border-left: 4px solid var(--accent);
   padding: 1.5rem;
   background: #f9f9f9;
   border-radius: 6px;
@@ -184,7 +192,7 @@
 
 .storyHeader h3 {
   margin: 0;
-  color: #333;
+  color: var(--card-heading);
   font-size: 1.1rem;
 }
 
@@ -195,7 +203,7 @@
 
 .storyText {
   margin: 0;
-  color: #555;
+  color: var(--card-body);
   line-height: 1.8;
   white-space: pre-wrap;
   word-wrap: break-word;

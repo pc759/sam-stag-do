@@ -1,0 +1,72 @@
+.container {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.loading {
+  text-align: center;
+  padding: 2rem;
+}
+
+.composer {
+  display: grid;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.composer textarea {
+  min-height: 88px;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  font: inherit;
+  resize: vertical;
+}
+
+.composer button {
+  width: fit-content;
+  padding: 0.5rem 1rem;
+  background: #111827;
+  color: #fff;
+  border: 0;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.posts {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.post {
+  padding: 0.85rem 1rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(17, 24, 39, 0.05);
+}
+
+.post header {
+  font-size: 0.85rem;
+  color: var(--card-muted);
+  margin-bottom: 0.4rem;
+}
+
+.post header strong {
+  color: var(--card-heading);
+}
+
+.post p {
+  margin: 0;
+  white-space: pre-wrap;
+  line-height: 1.45;
+}
+
+.hint {
+  color: var(--card-muted);
+  font-size: 0.95rem;
+  margin-top: 0;
+}

@@ -1,0 +1,29 @@
+New-Item -ItemType Directory -Force -Path .simlink\logs | Out-Null
+git ls-files > .simlink\git-files.txt
+
+git ls-files | ForEach-Object { $f = $_; $s = (Get-Item $f).Length; "$f,$s" } > .simlink\file-sizes.csv
+
+git ls-files | ForEach-Object { $f = $_; (Get-FileHash $f -Algorithm SHA1).Hash + " ," + $f } > .simlink\file-sha1.csv
+
+# large assets >100KB
+Get-ChildItem -Recurse -File | Where-Object { $_.Length -gt 100KB -and $_.FullName -notmatch "\\.git\\" } | ForEach-Object { $_.FullName } > .simlink\large-assets.txt
+
+New-Item -ItemType Directory -Force -Path .simlink\build_snippets | Out-Null
+$files = @("settings.gradle","settings.gradle.kts","build.gradle","build.gradle.kts","gradle.properties","app\build.gradle","app\build.gradle.kts","app\src\main\AndroidManifest.xml")
+foreach ($f in $files) {
+  if (Test-Path $f) { Get-Content $f -TotalCount 200 | Set-Content ".simlink\build_snippets\$($f -replace '[\\/]','_')" }
+}
+
+$json = @{
+  generated_at = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
+  git_root = (git rev-parse --show-toplevel 2>$null) -replace "`n",""
+  tracked_files = ".simlink/git-files.txt"
+  file_sizes = ".simlink/file-sizes.csv"
+  large_assets = ".simlink/large-assets.txt"
+  build_snippets = ".simlink/build_snippets"
+  notes = @("Do NOT store secrets in repo (local.properties excluded)","Discovery snapshot for Simlink agent")
+} | ConvertTo-Json -Depth 4
+
+$json | Out-File -FilePath .simlink\index.json -Encoding utf8
+
+Write-Host "Discovery complete: .simlink/index.json (tracked files: $(Get-Content .simlink\git-files.txt).Count)"

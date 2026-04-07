@@ -1,0 +1,8 @@
+/node_modules
+/.next
+/out
+*.log
+stories.db
+.env*.local
+public/uploads/*
+!public/uploads/.gitkeep

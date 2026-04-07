@@ -1,0 +1,101 @@
+-------------------------------------------------------------------------------
+                    PLANNING GATE VALIDATION TEST RESULTS
+-------------------------------------------------------------------------------
+
+TEST 1: Required-Pass Scenario
+------------------------------
+File: required-pass.md
+Configuration: Planning Gate Required [x], Planning Gate Exempt [ ]
+Content: Full meaningful planning details in all required sections
+Objective: Implement new authentication mechanism
+Scope: User auth flow, token management, session handling
+Discovery: Identified 3 key requirements and reviewed patterns
+Conflict: Reviewed dependencies, scheduled coordination
+Implementation: 3-phase approach with rollback checkpoints
+Verification: Unit, integration, E2E tests + performance benchmarks
+Rollback: Feature flags with backward-compatible schema changes
+
+Result: ? PASSED (Exit Code: 0)
+
+
+TEST 2: Exempt-Pass Scenario
+-----------------------------
+File: exempt-pass.md
+Configuration: Planning Gate Required [ ], Planning Gate Exempt [x]
+Content: Meaningful exemption rationale, N/A in planning fields
+Exemption Rationale: Production outage affecting 10% of users, 
+                     localized fix, single config change, simple rollback
+Objective: N/A
+Scope: N/A
+Discovery: N/A
+Conflict: N/A
+Implementation: N/A
+Verification: N/A
+Rollback: N/A
+
+Result: ? PASSED (Exit Code: 0)
+
+
+TEST 3: Invalid-Fail Scenario
+-----------------------------
+File: invalid-fail.md
+Configuration: Planning Gate Required [x], Planning Gate Exempt [ ]
+Content: Objective set to "N/A" (invalid for Required planning gate)
+Objective: N/A (INVALID - should be meaningful)
+Scope: Meaningful content
+Discovery: Meaningful content
+Conflict: Meaningful content
+Implementation: Meaningful content
+Verification: Meaningful content
+Rollback: Meaningful content
+
+Result: ? FAILED (Exit Code: 1)
+Error Message:
+  "Planning Gate Required selected, but these sections are missing 
+   meaningful content: Objective"
+
+Validation correctly rejected missing meaningful content in required section.
+
+
+-------------------------------------------------------------------------------
+                              NPM VERIFY RESULT
+-------------------------------------------------------------------------------
+
+Command: npm run verify
+Steps Executed:
+  1. npm run lint   ? Completed (warnings only, no errors)
+  2. npm run build  ? Compiled successfully
+
+Exit Code: 0
+
+Build Summary:
+  - TypeScript linting: ? Passed
+  - Next.js build: ? Compiled successfully
+  - Route generation: ? Generated 15 pages
+  - Static optimization: ? Completed
+
+Result: ? VERIFY PASSED
+
+
+-------------------------------------------------------------------------------
+                            OVERALL TEST SUMMARY
+-------------------------------------------------------------------------------
+
+Planning Gate Validator Scenarios:
+  ? Required-Pass: 1/1 passed
+  ? Exempt-Pass:   1/1 passed  
+  ? Invalid-Fail:  1/1 correctly rejected
+  
+NPM Verify Build:
+  ? Lint check passed
+  ? Next.js build passed
+  
+Final Status: ? ALL TESTS PASSED
+
+The planning-gate validation script correctly:
+  1. Validates "Planning Gate Required" entries with full planning content
+  2. Validates "Planning Gate Exempt" entries with meaningful exemption rationale
+  3. Rejects invalid scenarios with clear error messages
+  4. Allows npm verify to execute cleanly for linting and building
+
+-------------------------------------------------------------------------------

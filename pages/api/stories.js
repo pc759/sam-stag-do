@@ -1,51 +1,41 @@
-import sqlite3 from 'sqlite3';
-import path from 'path';
+import { getDb } from '../../lib/db';
+import { getSessionUser } from '../../lib/auth';
 
-const dbPath = path.join(process.cwd(), 'stories.db');
-const db = new sqlite3.Database(dbPath);
+export default async function handler(req, res) {
+  const db = await getDb();
+  const user = await getSessionUser(req, db);
 
-// Initialize table
-db.serialize(() => {
-  db.run(`
-    CREATE TABLE IF NOT EXISTS stories (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      author TEXT NOT NULL,
-      story TEXT NOT NULL,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    )
-  `);
-});
+  if (!user) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
 
-export default function handler(req, res) {
   if (req.method === 'GET') {
-    db.all('SELECT * FROM stories ORDER BY created_at DESC', (err, rows) => {
-      if (err) {
-        console.error('GET Error:', err);
-        return res.status(500).json({ error: err.message });
-      }
-      res.status(200).json(rows || []);
-    });
-  } 
-  else if (req.method === 'POST') {
+    try {
+      const rows = await db.all('SELECT * FROM stories ORDER BY created_at DESC');
+      return res.status(200).json(rows || []);
+    } catch (err) {
+      console.error('GET Error:', err);
+      return res.status(500).json({ error: err.message });
+    }
+  } else if (req.method === 'POST') {
     const { author, story } = req.body;
-    
-    if (!author || !story) {
+    const finalAuthor = (author || '').trim() || user.name;
+
+    if (!finalAuthor || !story) {
       return res.status(400).json({ error: 'Missing author or story' });
     }
 
-    db.run(
-      'INSERT INTO stories (author, story) VALUES (?, ?)',
-      [author, story],
-      function(err) {
-        if (err) {
-          console.error('POST Error:', err);
-          return res.status(500).json({ error: err.message });
-        }
-        res.status(201).json({ success: true, id: this.lastID });
-      }
-    );
-  } 
-  else {
-    res.status(405).json({ error: 'Method not allowed' });
+    try {
+      const result = await db.run(
+        'INSERT INTO stories (author, story) VALUES (?, ?)',
+        [finalAuthor, story]
+      );
+      return res.status(201).json({ success: true, id: result.lastID });
+    } catch (err) {
+      console.error('POST Error:', err);
+      return res.status(500).json({ error: err.message });
+    }
   }
+
+  return res.status(405).json({ error: 'Method not allowed' });
 }

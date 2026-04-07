@@ -1,11 +1,11 @@
 .container {
-  animation: fadeIn 0.5s ease-in;
+  animation: fadeIn 0.4s ease-in;
 }
 
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
@@ -18,129 +18,298 @@
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  font-size: 1.5rem;
+  background: linear-gradient(
+    135deg,
+    var(--grad-start) 0%,
+    var(--grad-end) 100%
+  );
+  color: var(--page-text);
+  font-size: 1.25rem;
 }
 
-.container h1 {
-  color: white;
-  font-size: 2.5rem;
-  margin: 0 0 0.5rem 0;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+.heroWrap {
+  position: relative;
+  margin-bottom: 1.25rem;
+  padding: 2rem 1.25rem 2.25rem;
+  border-radius: 16px;
+  overflow: hidden;
+  color: var(--page-text);
+  text-align: center;
+}
+
+.fogLayer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+  border-radius: 16px;
+}
+
+.fogA,
+.fogB {
+  position: absolute;
+  width: 180%;
+  height: 180%;
+  left: -40%;
+  top: -40%;
+  opacity: var(--hero-fog-opacity, 0.38);
+  filter: blur(48px);
+  will-change: transform;
+}
+
+.fogA {
+  background: radial-gradient(
+    ellipse 55% 45% at 35% 55%,
+    color-mix(in srgb, var(--hero-fog-tint) 55%, transparent) 0%,
+    transparent 70%
+  );
+  animation: fogDrift var(--hero-fog-duration, 72s) ease-in-out infinite alternate;
+}
+
+.fogB {
+  background: radial-gradient(
+    ellipse 50% 50% at 65% 45%,
+    color-mix(in srgb, var(--hero-fog-tint) 40%, transparent) 0%,
+    transparent 68%
+  );
+  animation: fogDrift2 var(--hero-fog-duration, 72s) ease-in-out infinite alternate-reverse;
+  animation-delay: -36s;
+}
+
+html[data-hero-fog='off'] .fogA,
+html[data-hero-fog='off'] .fogB {
+  opacity: 0;
+  animation: none;
+}
+
+@keyframes fogDrift {
+  0% {
+    transform: translate3d(-4%, 0, 0) scale(1.02);
+  }
+  100% {
+    transform: translate3d(6%, 2%, 0) scale(1.06);
+  }
+}
+
+@keyframes fogDrift2 {
+  0% {
+    transform: translate3d(5%, -3%, 0) scale(1.04);
+  }
+  100% {
+    transform: translate3d(-5%, 4%, 0) scale(1.08);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fogA,
+  .fogB {
+    animation: none;
+  }
+}
+
+.hero {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+}
+
+.kicker {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--page-text);
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  margin: 0 0 0.6rem;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+}
+
+.hero h1 {
+  margin: 0;
+  color: var(--page-text);
+  font-size: 2.2rem;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
 }
 
 .subtitle {
-  color: rgba(255, 255, 255, 0.9);
-  font-size: 1.1rem;
-  margin: 0 0 2rem 0;
+  color: var(--page-text-muted);
+  margin: 0.4rem 0 0;
 }
 
-.grid {
+.bento {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 3rem;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 0.85rem;
 }
 
-.detailCard {
-  background: white;
-  border-radius: 12px;
-  padding: 2rem;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-  text-align: center;
-  transition: all 0.3s ease;
+.card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 1rem;
+  box-shadow: 0 8px 22px rgba(17, 24, 39, 0.08);
 }
 
-.detailCard:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+.card h2 {
+  margin: 0.2rem 0 0.6rem;
+}
+
+.card p {
+  margin: 0.25rem 0;
+  color: var(--card-body);
+  line-height: 1.5;
 }
 
 .icon {
-  font-size: 3rem;
-  margin-bottom: 1rem;
-}
-
-.detailCard h2 {
-  margin: 0 0 1rem 0;
-  color: #333;
-  font-size: 1.5rem;
+  font-size: 1.9rem;
 }
 
 .highlight {
-  color: #667eea;
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.whenCard,
+.whereCard,
+.costCard {
+  grid-column: span 3;
+}
+
+.whoCard {
+  grid-column: span 6;
+}
+
+.bringCard,
+.itineraryCard {
+  grid-column: span 6;
+}
+
+.questionsCard {
+  grid-column: span 12;
+}
+
+.attendeeList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.7rem;
+}
+
+.mapWrap {
+  margin-top: 0.75rem;
+  border: 1px solid #dbe3f0;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.mapFrame {
+  display: block;
+  width: 100%;
+  height: 180px;
+  border: 0;
+}
+
+.whereLinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 0.65rem;
+}
+
+.whereLinks a {
+  color: var(--accent);
+  text-decoration: none;
   font-weight: 600;
-  font-size: 1.1rem;
-  margin: 0.5rem 0;
 }
 
-.detailCard p {
-  color: #666;
-  margin: 0.5rem 0;
-  line-height: 1.6;
+.whereLinks a:hover {
+  text-decoration: underline;
 }
 
-.section {
-  background: white;
-  border-radius: 12px;
-  padding: 2rem;
-  margin-bottom: 2rem;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+.attendeePill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  text-decoration: none;
+  color: var(--card-heading);
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  border-radius: 999px;
+  padding: 0.3rem 0.55rem 0.3rem 0.35rem;
 }
 
-.section h2 {
-  margin-top: 0;
-  color: #333;
-  font-size: 1.8rem;
-  border-bottom: 3px solid #667eea;
-  padding-bottom: 1rem;
+.attendeeAvatar,
+.attendeeInitial {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: grid;
+  place-items: center;
+  background: #dbeafe;
+  color: #1e3a8a;
+  font-weight: 700;
+  font-size: 0.8rem;
 }
 
-.section p {
-  color: #666;
-  line-height: 1.8;
-  margin: 1rem 0;
+.emptyAttending {
+  margin-top: 0.6rem;
 }
 
 .list {
   list-style: none;
   padding: 0;
-  margin: 1rem 0;
+  margin: 0;
 }
 
 .list li {
-  color: #666;
-  padding: 0.75rem 0;
-  padding-left: 2rem;
   position: relative;
-  line-height: 1.6;
+  padding-left: 1.4rem;
+  margin: 0.35rem 0;
 }
 
-.list li:before {
-  content: "✓";
+.list li::before {
+  content: '✓';
   position: absolute;
   left: 0;
-  color: #667eea;
-  font-weight: bold;
-  font-size: 1.2rem;
+  color: var(--accent);
+  font-weight: 700;
 }
 
-@media (max-width: 768px) {
-  .container h1 {
-    font-size: 1.8rem;
+@media (max-width: 1024px) {
+  .whenCard,
+  .whereCard,
+  .costCard {
+    grid-column: span 4;
   }
 
-  .grid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
+  .whoCard,
+  .bringCard,
+  .itineraryCard,
+  .questionsCard {
+    grid-column: span 12;
+  }
+}
+
+@media (max-width: 640px) {
+  .hero h1 {
+    font-size: 1.7rem;
   }
 
-  .section {
-    padding: 1.5rem;
+  .bento {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
   }
 
-  .section h2 {
-    font-size: 1.3rem;
+  .card,
+  .whenCard,
+  .whereCard,
+  .costCard,
+  .whoCard,
+  .bringCard,
+  .itineraryCard,
+  .questionsCard {
+    grid-column: span 1;
   }
 }

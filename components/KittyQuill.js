@@ -1,26 +1,14 @@
-import { useMemo } from 'react';
-import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
+import MDEditor from '@uiw/react-md-editor';
 
 export default function KittyQuill({ value, onChange }) {
-  const modules = useMemo(
-    () => ({
-      toolbar: [
-        ['bold', 'italic', 'underline'],
-        [{ list: 'ordered' }, { list: 'bullet' }],
-        ['link', 'clean']
-      ]
-    }),
-    []
-  );
-
   return (
-    <ReactQuill
-      theme="snow"
-      value={value || ''}
-      onChange={onChange}
-      modules={modules}
-      placeholder="List prizes, rules, or kitty notes…"
-    />
+    <div data-color-mode="light">
+      <MDEditor
+        value={value || ''}
+        onChange={(val) => onChange(val || '')}
+        preview="live"
+        height={300}
+      />
+    </div>
   );
 }

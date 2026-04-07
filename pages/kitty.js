@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react';
+import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
 import Layout from '../components/Layout';
 import styles from '../styles/Kitty.module.css';
+
+const MarkdownRenderer = dynamic(() => import('../components/MarkdownRenderer'), { ssr: false });
 
 export default function Kitty() {
   const router = useRouter();
@@ -47,7 +50,7 @@ export default function Kitty() {
           <p className={styles.subtitle}>What&apos;s in the pot — and what you might win.</p>
         </header>
         {html?.trim() ? (
-          <div className={styles.prose} dangerouslySetInnerHTML={{ __html: html }} />
+          <div className={styles.prose}><MarkdownRenderer content={html} /></div>
         ) : (
           <p className={styles.empty}>Nothing listed yet. Check back after the organiser updates this page.</p>
         )}

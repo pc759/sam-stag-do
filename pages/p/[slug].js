@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react';
+import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
 import Layout from '../../components/Layout';
 import styles from '../../styles/Page.module.css';
+
+const MarkdownRenderer = dynamic(() => import('../../components/MarkdownRenderer'), { ssr: false });
 
 export default function DynamicPage() {
   const router = useRouter();
@@ -61,7 +64,7 @@ export default function DynamicPage() {
             {page.subtitle && <p className={styles.subtitle}>{page.subtitle}</p>}
           </header>
           {page.body?.trim() ? (
-            <div className={styles.prose} dangerouslySetInnerHTML={{ __html: page.body }} />
+            <div className={styles.prose}><MarkdownRenderer content={page.body} /></div>
           ) : (
             <p style={{ opacity: 0.6, textAlign: 'center' }}>This page has no content yet.</p>
           )}

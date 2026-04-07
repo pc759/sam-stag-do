@@ -12,12 +12,12 @@
     "test:a11y": "node -e \"console.log('With dev server running: npx @axe-core/cli http://localhost:3000 http://localhost:3000/login http://localhost:3000/admin --exit --tags wcag2a,wcag21aa')\""
   },
   "dependencies": {
+    "@uiw/react-md-editor": "^4.1.0",
     "formidable": "^3.5.4",
     "next": "^14.0.0",
     "react": "^18.2.0",
     "react-colorful": "^5.6.1",
     "react-dom": "^18.2.0",
-    "react-quill": "^2.0.0",
     "sqlite": "^5.1.1",
     "sqlite3": "^5.1.6"
   },

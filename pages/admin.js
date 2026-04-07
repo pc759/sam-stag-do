@@ -13,6 +13,7 @@ const TABS = [
 { id: 'look', label: 'Look & feel' },
 { id: 'content', label: 'Content' },
 { id: 'pages', label: 'Pages' },
+{ id: 'navigation', label: 'Navigation' },
 { id: 'traitors', label: 'Traitors / votes' },
 { id: 'expenses', label: 'Expenses' },
 { id: 'stories', label: 'Stories' },
@@ -69,6 +70,9 @@ const [voteParticipantIds, setVoteParticipantIds] = useState(new Set());
 const [voteCandidateIds, setVoteCandidateIds] = useState(new Set());
 const [showCreateVote, setShowCreateVote] = useState(false);
 const [adminPassword, setAdminPassword] = useState('');
+const [navItems, setNavItems] = useState([]);
+const [editingNavId, setEditingNavId] = useState(null);
+const [navForm, setNavForm] = useState({ label: '', pageId: '', url: '', parentId: '', sortOrder: 0, isVisible: true, openInNewTab: false });
 const [activeTab, setActiveTab] = useState('look');
 
 useEffect(() => {
@@ -185,6 +189,66 @@ setEditingPageId(null);
 fetchAdminPages();
 } else {
 setStatus('Failed to delete page.');
+}
+};
+
+const fetchNavItems = async () => {
+const res = await fetch('/api/admin/navigation');
+if (!res.ok) return;
+setNavItems(await res.json());
+};
+
+const handleSaveNavItem = async (e) => {
+e.preventDefault();
+setStatus('');
+const payload = {
+...navForm,
+pageId: navForm.pageId ? Number(navForm.pageId) : null,
+parentId: navForm.parentId ? Number(navForm.parentId) : null,
+sortOrder: Number(navForm.sortOrder) || 0
+};
+if (editingNavId) payload.id = editingNavId;
+const res = await fetch('/api/admin/navigation', {
+method: editingNavId ? 'PUT' : 'POST',
+headers: { 'Content-Type': 'application/json' },
+body: JSON.stringify(payload)
+});
+if (res.ok) {
+setStatus(editingNavId ? 'Nav item updated.' : 'Nav item created.');
+setNavForm({ label: '', pageId: '', url: '', parentId: '', sortOrder: 0, isVisible: true, openInNewTab: false });
+setEditingNavId(null);
+fetchNavItems();
+} else {
+const data = await res.json().catch(() => ({}));
+setStatus(data.error || 'Failed to save nav item.');
+}
+};
+
+const handleEditNavItem = (item) => {
+setEditingNavId(item.id);
+setNavForm({
+label: item.label || '',
+pageId: item.pageId ? String(item.pageId) : '',
+url: item.url || '',
+parentId: item.parentId ? String(item.parentId) : '',
+sortOrder: item.sortOrder || 0,
+isVisible: item.isVisible !== false,
+openInNewTab: !!item.openInNewTab
+});
+};
+
+const handleDeleteNavItem = async (id) => {
+if (!window.confirm('Delete this nav item? Children will also be deleted.')) return;
+const res = await fetch(`/api/admin/navigation?id=${id}`, { method: 'DELETE' });
+if (res.ok) {
+setStatus('Nav item deleted.');
+if (editingNavId === id) {
+setNavForm({ label: '', pageId: '', url: '', parentId: '', sortOrder: 0, isVisible: true, openInNewTab: false });
+setEditingNavId(null);
+}
+fetchNavItems();
+} else {
+setStatus('Failed to delete nav item.');
 }
 };
 
@@ -604,6 +668,11 @@ useEffect(() => {
     return;
   }
   Promise.all([fetchAdminExpenses(), fetchAdminPayments()]);
+}, [isAuthenticated, user?.isAdmin, activeTab]);
+useEffect(() => {
+  if (!isAuthenticated || !user?.isAdmin || activeTab !== 'navigation') return;
+  fetchNavItems();
+  fetchAdminPages();
 }, [isAuthenticated, user?.isAdmin, activeTab]);
   const handleSetAdminPassword = async (e) => {
     e.preventDefault();
@@ -1313,6 +1382,82 @@ useEffect(() => {
                     </div>
                   ))}
                 </div>
+              </section>
+            </>
+          )}
+        </div>
+
+        <div
+          id="admin-panel-navigation"
+          role="tabpanel"
+          aria-labelledby="admin-tab-navigation"
+          hidden={activeTab !== 'navigation'}
+        >
+          {activeTab === 'navigation' && (
+            <>
+              <section className={styles.section}>
+                <h2>{editingNavId ? 'Edit Menu Item' : 'Add Menu Item'}</h2>
+                <form onSubmit={handleSaveNavItem} className={styles.form}>
+                  <label>Label <input value={navForm.label} onChange={(e) => setNavForm({ ...navForm, label: e.target.value })} required /></label>
+                  <label>Link to page
+                    <select value={navForm.pageId} onChange={(e) => {
+                      const pid = e.target.value;
+                      const pg = adminPages.find((p) => String(p.id) === pid);
+                      setNavForm({ ...navForm, pageId: pid, url: '', label: navForm.label || (pg ? pg.title : '') });
+                    }}>
+                      <option value="">None (custom URL)</option>
+                      {adminPages.map((pg) => <option key={pg.id} value={pg.id}>{pg.title}{pg.isPublished ? '' : ' (draft)'}</option>)}
+                    </select>
+                  </label>
+                  {!navForm.pageId && (
+                    <label>Custom URL <input value={navForm.url} onChange={(e) => setNavForm({ ...navForm, url: e.target.value })} placeholder="/votes or https://..." /></label>
+                  )}
+                  <label>Parent
+                    <select value={navForm.parentId} onChange={(e) => setNavForm({ ...navForm, parentId: e.target.value })}>
+                      <option value="">None (top level)</option>
+                      {navItems.filter((ni) => !ni.parentId && ni.id !== editingNavId).map((ni) => <option key={ni.id} value={ni.id}>{ni.label}</option>)}
+                    </select>
+                  </label>
+                  <label>Sort order <input type="number" value={navForm.sortOrder} onChange={(e) => setNavForm({ ...navForm, sortOrder: Number(e.target.value) })} /></label>
+                  <label className={styles.checkboxLabel}><input type="checkbox" checked={navForm.isVisible} onChange={(e) => setNavForm({ ...navForm, isVisible: e.target.checked })} /> Visible</label>
+                  <label className={styles.checkboxLabel}><input type="checkbox" checked={navForm.openInNewTab} onChange={(e) => setNavForm({ ...navForm, openInNewTab: e.target.checked })} /> Open in new tab</label>
+                  <div className={styles.inlineActions}>
+                    <button type="submit">{editingNavId ? 'Update' : 'Add'} Menu Item</button>
+                    {editingNavId ? <button type="button" className={styles.secondaryBtn} onClick={() => { setEditingNavId(null); setNavForm({ label: '', pageId: '', url: '', parentId: '', sortOrder: 0, isVisible: true, openInNewTab: false }); }}>Cancel</button> : null}
+                  </div>
+                </form>
+              </section>
+              <section className={styles.section}>
+                <h2>Menu Items ({navItems.length})</h2>
+                <p className={styles.help}>Top-level items appear in the nav bar. Children appear as dropdowns under their parent.</p>
+                <div className={styles.storyList}>
+                  {navItems.filter((ni) => !ni.parentId).map((ni) => (
+                    <article key={ni.id} className={styles.storyCard}>
+                      <header>
+                        <strong>{ni.label}</strong>
+                        <span>{ni.pageSlug ? `/p/${ni.pageSlug}` : ni.url || '/'} {ni.isVisible ? '' : '(hidden)'}</span>
+                      </header>
+                      <p className={styles.help}>Order: {ni.sortOrder}{ni.pageTitle ? ` · Page: ${ni.pageTitle}` : ''}</p>
+                      <div className={styles.inlineActions}>
+                        <button type="button" onClick={() => handleEditNavItem(ni)}>Edit</button>
+                        <button type="button" onClick={() => handleDeleteNavItem(ni.id)}>Delete</button>
+                      </div>
+                      {navItems.filter((child) => child.parentId === ni.id).map((child) => (
+                        <article key={child.id} className={styles.storyCard} style={{ marginLeft: '1.5rem', marginTop: '0.5rem', borderLeft: '3px solid var(--accent, #6c9)' }}>
+                          <header>
+                            <strong>{child.label}</strong>
+                            <span>{child.pageSlug ? `/p/${child.pageSlug}` : child.url || '/'} {child.isVisible ? '' : '(hidden)'}</span>
+                          </header>
+                          <div className={styles.inlineActions}>
+                            <button type="button" onClick={() => handleEditNavItem(child)}>Edit</button>
+                            <button type="button" onClick={() => handleDeleteNavItem(child.id)}>Delete</button>
+                          </div>
+                        </article>
+                      ))}
+                    </article>
+                  ))}
+                </div>
+                {navItems.length === 0 ? <p className={styles.help}>No nav items yet. Add one above, or run the migration seed script.</p> : null}
               </section>
             </>
           )}

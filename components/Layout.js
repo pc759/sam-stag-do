@@ -10,13 +10,13 @@ export default function Layout({ children, isAuthenticated, user }) {
   const { branding } = useBranding();
   const siteTitle = branding?.homeTitle || "Sam's Stag Do";
   const logoUrl = (branding?.siteLogoUrl || '').trim() || '/brand/logo.png';
-  const [navPages, setNavPages] = useState([]);
+  const [navTree, setNavTree] = useState([]);
 
   useEffect(() => {
     if (!isAuthenticated) return;
-    fetch('/api/pages')
+    fetch('/api/navigation')
       .then((r) => (r.ok ? r.json() : []))
-      .then(setNavPages)
+      .then(setNavTree)
       .catch(() => {});
   }, [isAuthenticated]);
 
@@ -34,7 +34,7 @@ export default function Layout({ children, isAuthenticated, user }) {
     if (path === '/votes') {
       return router.pathname === '/votes' || router.pathname.startsWith('/votes/');
     }
-    return router.pathname === path;
+    return router.asPath === path || router.pathname === path;
   };
 
   return (
@@ -54,33 +54,46 @@ export default function Layout({ children, isAuthenticated, user }) {
             </span>
           </Link>
           <div className={styles.navLinks}>
-            <Link
-              href="/"
-              className={`${styles.navLink} ${isActive('/') ? styles.active : ''}`}
-            >
-              Home
-            </Link>
-            {navPages.filter((p) => p.showInNav).map((p) => (
-              <Link
-                key={p.id}
-                href={`/p/${p.slug}`}
-                className={`${styles.navLink} ${router.asPath === `/p/${p.slug}` ? styles.active : ''}`}
-              >
-                {p.icon ? `${p.icon} ` : ''}{p.title}
-              </Link>
-            ))}
-            <Link
-              href="/shame-vault"
-              className={`${styles.navLink} ${isActive('/shame-vault') ? styles.active : ''}`}
-            >
-              Shame Vault
-            </Link>
-            <Link
-              href="/votes"
-              className={`${styles.navLink} ${isActive('/votes') ? styles.active : ''}`}
-            >
-              Votes
-            </Link>
+            {navTree.map((item) =>
+              item.children && item.children.length > 0 ? (
+                <div key={item.id} className={styles.navDropdown}>
+                  <button
+                    type="button"
+                    className={styles.navDropdownTrigger}
+                  >
+                    {item.label} &#9662;
+                  </button>
+                  <div className={styles.navDropdownMenu}>
+                    <Link
+                      href={item.url}
+                      className={`${styles.navLink} ${isActive(item.url) ? styles.active : ''}`}
+                      {...(item.openInNewTab ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                    >
+                      {item.label}
+                    </Link>
+                    {item.children.map((child) => (
+                      <Link
+                        key={child.id}
+                        href={child.url}
+                        className={`${styles.navLink} ${isActive(child.url) ? styles.active : ''}`}
+                        {...(child.openInNewTab ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                      >
+                        {child.label}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <Link
+                  key={item.id}
+                  href={item.url}
+                  className={`${styles.navLink} ${isActive(item.url) ? styles.active : ''}`}
+                  {...(item.openInNewTab ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                >
+                  {item.label}
+                </Link>
+              )
+            )}
             {user?.traitorChannelAccess ? (
               <Link
                 href="/traitor-board"

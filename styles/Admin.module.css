@@ -366,3 +366,35 @@
   min-height: 180px;
   font-size: 1rem;
 }
+
+.expenseTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1rem;
+}
+
+.expenseTable th,
+.expenseTable td {
+  text-align: left;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.expenseTable th {
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--card-muted, #666);
+}
+
+.expenseFormsRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  align-items: start;
+}
+
+@media (max-width: 768px) {
+  .expenseFormsRow {
+    grid-template-columns: 1fr;
+  }
+}

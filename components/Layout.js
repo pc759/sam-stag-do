@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useBranding } from '../contexts/BrandingContext';
 import styles from '../styles/Layout.module.css';
 
@@ -10,6 +10,15 @@ export default function Layout({ children, isAuthenticated, user }) {
   const { branding } = useBranding();
   const siteTitle = branding?.homeTitle || "Sam's Stag Do";
   const logoUrl = (branding?.siteLogoUrl || '').trim() || '/brand/logo.png';
+  const [navPages, setNavPages] = useState([]);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    fetch('/api/pages')
+      .then((r) => (r.ok ? r.json() : []))
+      .then(setNavPages)
+      .catch(() => {});
+  }, [isAuthenticated]);
 
   const handleLogout = async () => {
     setIsLoggingOut(true);
@@ -51,6 +60,15 @@ export default function Layout({ children, isAuthenticated, user }) {
             >
               Home
             </Link>
+            {navPages.filter((p) => p.showInNav).map((p) => (
+              <Link
+                key={p.id}
+                href={`/p/${p.slug}`}
+                className={`${styles.navLink} ${router.asPath === `/p/${p.slug}` ? styles.active : ''}`}
+              >
+                {p.icon ? `${p.icon} ` : ''}{p.title}
+              </Link>
+            ))}
             <Link
               href="/shame-vault"
               className={`${styles.navLink} ${isActive('/shame-vault') ? styles.active : ''}`}

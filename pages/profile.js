@@ -80,6 +80,48 @@ export default function Profile() {
             <img src={user.photoUrl} alt="" className={styles.avatar} />
           </div>
         ) : null}
+        {user.money && user.money.summary ? (
+          <div className={styles.moneySection}>
+            <h2>Your Balance</h2>
+            <div className={styles.moneyGrid}>
+              <div className={styles.moneyCard}>
+                <span className={styles.moneyLabel}>You owe</span>
+                <span className={styles.moneyValue}>£{(user.money.summary.owed_pence / 100).toFixed(2)}</span>
+              </div>
+              <div className={styles.moneyCard}>
+                <span className={styles.moneyLabel}>You&apos;ve paid</span>
+                <span className={styles.moneyValue}>£{(user.money.summary.paid_pence / 100).toFixed(2)}</span>
+              </div>
+              <div className={styles.moneyCard}>
+                <span className={styles.moneyLabel}>Balance</span>
+                <span className={`${styles.moneyValue} ${user.money.summary.balance_pence >= 0 ? styles.moneyPositive : styles.moneyNegative}`}>
+                  £{(user.money.summary.balance_pence / 100).toFixed(2)}
+                </span>
+              </div>
+            </div>
+            {user.money.recentExpenses && user.money.recentExpenses.length > 0 ? (
+              <details className={styles.moneyDetails}>
+                <summary>Recent expenses</summary>
+                <ul>
+                  {user.money.recentExpenses.map((exp) => (
+                    <li key={exp.id}>{exp.title} — £{(exp.amount_pence / 100).toFixed(2)}</li>
+                  ))}
+                </ul>
+              </details>
+            ) : null}
+            {user.money.recentPayments && user.money.recentPayments.length > 0 ? (
+              <details className={styles.moneyDetails}>
+                <summary>Recent payments</summary>
+                <ul>
+                  {user.money.recentPayments.map((pay) => (
+                    <li key={pay.id}>{pay.expense_title || 'Payment'} — £{(pay.amount_pence / 100).toFixed(2)}</li>
+                  ))}
+                </ul>
+              </details>
+            ) : null}
+          </div>
+        ) : null}
+
         <form className={styles.form} onSubmit={saveProfile}>
           <label>
             Name

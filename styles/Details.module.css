@@ -254,6 +254,43 @@ html[data-hero-fog='off'] .fogB {
   font-size: 0.8rem;
 }
 
+.pagesCard {
+  grid-column: 1 / -1;
+}
+
+.pagesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.pageLink {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 1rem;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  text-decoration: none;
+  color: inherit;
+  transition: background 0.2s;
+}
+
+.pageLink:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.pageIcon {
+  font-size: 1.5rem;
+}
+
+.pageSub {
+  font-size: 0.85rem;
+  opacity: 0.7;
+  margin: 0;
+}
+
 .emptyAttending {
   margin-top: 0.6rem;
 }

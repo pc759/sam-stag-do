@@ -12,7 +12,7 @@ const KittyQuill = dynamic(() => import('../components/KittyQuill'), { ssr: fals
 const TABS = [
 { id: 'look', label: 'Look & feel' },
 { id: 'content', label: 'Content' },
-{ id: 'people', label: 'People & tags' },
+{ id: 'pages', label: 'Pages' },
 { id: 'traitors', label: 'Traitors / votes' },
 { id: 'expenses', label: 'Expenses' },
 { id: 'stories', label: 'Stories' },
@@ -51,16 +51,19 @@ const [expenseForm, setExpenseForm] = useState({
 title: '',
 notes: '',
 expenseDate: '',
-splits: [{ userId: '', amountPence: '' }]
+splits: [{ userId: '', amount: '' }]
 });
 const [editingExpenseId, setEditingExpenseId] = useState(null);
 const [paymentForm, setPaymentForm] = useState({
 userId: '',
 expenseId: '',
-amountPence: '',
+amount: '',
 paymentDate: '',
 notes: ''
 });
+const [adminPages, setAdminPages] = useState([]);
+const [editingPageId, setEditingPageId] = useState(null);
+const [pageForm, setPageForm] = useState({ title: '', slug: '', icon: '', subtitle: '', body: '', showInNav: true, isPublished: false, sortOrder: 0, showOnHomepage: false, homepageOrder: 0, gridSpan: 4 });
 const [newVoteTitle, setNewVoteTitle] = useState('');
 const [voteParticipantIds, setVoteParticipantIds] = useState(new Set());
 const [voteCandidateIds, setVoteCandidateIds] = useState(new Set());
@@ -125,6 +128,66 @@ const data = await res.json();
 setTags(data);
 };
 
+const fetchAdminPages = async () => {
+const res = await fetch('/api/admin/pages');
+if (!res.ok) return;
+setAdminPages(await res.json());
+};
+
+const handleSavePage = async (e) => {
+e.preventDefault();
+setStatus('');
+const payload = { ...pageForm };
+if (editingPageId) payload.id = editingPageId;
+const res = await fetch('/api/admin/pages', {
+method: editingPageId ? 'PUT' : 'POST',
+headers: { 'Content-Type': 'application/json' },
+body: JSON.stringify(payload)
+});
+if (res.ok) {
+setStatus(editingPageId ? 'Page updated.' : 'Page created.');
+setPageForm({ title: '', slug: '', icon: '', subtitle: '', body: '', showInNav: true, isPublished: false, sortOrder: 0 });
+setEditingPageId(null);
+fetchAdminPages();
+} else {
+const data = await res.json().catch(() => ({}));
+setStatus(data.error || 'Failed to save page.');
+}
+};
+
+const handleEditPage = (page) => {
+setEditingPageId(page.id);
+setPageForm({
+title: page.title || '',
+slug: page.slug || '',
+icon: page.icon || '',
+subtitle: page.subtitle || '',
+body: page.body || '',
+showInNav: !!page.showInNav,
+isPublished: !!page.isPublished,
+sortOrder: page.sortOrder || 0,
+showOnHomepage: !!page.showOnHomepage,
+homepageOrder: page.homepageOrder || 0,
+gridSpan: page.gridSpan || 4
+});
+setTimeout(() => { const el = document.getElementById('admin-panel-pages'); if (el) el.scrollIntoView({ behavior: 'smooth' }); }, 100);
+};
+
+const handleDeletePage = async (pageId) => {
+if (!window.confirm('Delete this page?')) return;
+const res = await fetch(`/api/admin/pages?id=${pageId}`, { method: 'DELETE' });
+if (res.ok) {
+setStatus('Page deleted.');
+if (editingPageId === pageId) {
+setPageForm({ title: '', slug: '', icon: '', subtitle: '', body: '', showInNav: true, isPublished: false, sortOrder: 0 });
+setEditingPageId(null);
+}
+fetchAdminPages();
+} else {
+setStatus('Failed to delete page.');
+}
+};
+
 const fetchAdminVotes = async () => {
 const res = await fetch('/api/admin/votes');
 if (!res.ok) return;
@@ -169,7 +232,7 @@ setIsLoading(false);
 init();
 }, [router]);
 const addSplitRow = () => {
-setExpenseForm((prev) => ({ ...prev, splits: [...prev.splits, { userId: '', amountPence: '' }] }));
+setExpenseForm((prev) => ({ ...prev, splits: [...prev.splits, { userId: '', amount: '' }] }));
 };
 const updateSplitRow = (index, key, value) => {
 setExpenseForm((prev) => {
@@ -194,7 +257,7 @@ setExpenseForm({
 title: '',
 notes: '',
 expenseDate: '',
-splits: [{ userId: '', amountPence: '' }]
+splits: [{ userId: '', amount: '' }]
 });
 setEditingExpenseId(null);
 };
@@ -208,8 +271,8 @@ expenseDate: expense.expense_date ? String(expense.expense_date).slice(0, 10) : 
 splits:
 expense.splits?.map((split) => ({
 userId: String(split.userId ?? split.user_id ?? ''),
-amountPence: String(split.amountPence ?? split.amount_pence ?? '')
-})) || [{ userId: '', amountPence: '' }]
+amount: String(((split.amountPence ?? split.amount_pence ?? 0) / 100).toFixed(2))
+})) || [{ userId: '', amount: '' }]
 });
 };
 
@@ -224,7 +287,7 @@ notes: expenseForm.notes,
 expenseDate: expenseForm.expenseDate || null,
 splits: expenseForm.splits.map((split) => ({
 userId: Number(split.userId),
-amountPence: Number(split.amountPence)
+amountPence: Math.round(Number(split.amount) * 100)
 }))
 };
 
@@ -268,7 +331,7 @@ setStatus('');
 const payload = {
 userId: Number(paymentForm.userId),
 expenseId: paymentForm.expenseId ? Number(paymentForm.expenseId) : null,
-amountPence: Number(paymentForm.amountPence),
+amountPence: Math.round(Number(paymentForm.amount) * 100),
 paymentDate: paymentForm.paymentDate || null,
 notes: paymentForm.notes
 };
@@ -281,7 +344,7 @@ body: JSON.stringify(payload)
 
 if (res.ok) {
 setStatus('Payment added.');
-setPaymentForm({ userId: '', expenseId: '', amountPence: '', paymentDate: '', notes: '' });
+setPaymentForm({ userId: '', expenseId: '', amount: '', paymentDate: '', notes: '' });
 await Promise.all([fetchAdminExpenses(), fetchAdminPayments()]);
 } else {
 const data = await res.json().catch(() => ({}));
@@ -530,6 +593,12 @@ useEffect(() => {
   fetchAdminVotes();
 }, [isAuthenticated, user?.isAdmin, activeTab]);
 
+useEffect(() => {
+  if (!isAuthenticated || !user?.isAdmin || activeTab !== 'pages') {
+    return;
+  }
+  fetchAdminPages();
+}, [isAuthenticated, user?.isAdmin, activeTab]);
 useEffect(() => {
   if (!isAuthenticated || !user?.isAdmin || activeTab !== 'expenses') {
     return;
@@ -1016,6 +1085,63 @@ useEffect(() => {
         </div>
 
         <div
+          id="admin-panel-pages"
+          role="tabpanel"
+          aria-labelledby="admin-tab-pages"
+          hidden={activeTab !== 'pages'}
+        >
+          {activeTab === 'pages' && (
+            <>
+              <section className={styles.section}>
+                <h2>{editingPageId ? 'Edit Page' : 'Create Page'}</h2>
+                <form onSubmit={handleSavePage} className={styles.form}>
+                  <label>Title <input value={pageForm.title} onChange={(e) => setPageForm({ ...pageForm, title: e.target.value })} required /></label>
+                  <label>Slug <input value={pageForm.slug} onChange={(e) => setPageForm({ ...pageForm, slug: e.target.value })} placeholder="auto-generated from title" /></label>
+                  <label>Icon (emoji) <input value={pageForm.icon} onChange={(e) => setPageForm({ ...pageForm, icon: e.target.value })} placeholder="e.g. \uD83C\uDFD5\uFE0F" /></label>
+                  <label>Subtitle <input value={pageForm.subtitle} onChange={(e) => setPageForm({ ...pageForm, subtitle: e.target.value })} /></label>
+                  <label>Sort order <input type="number" value={pageForm.sortOrder} onChange={(e) => setPageForm({ ...pageForm, sortOrder: Number(e.target.value) })} /></label>
+                  <label>Grid span <select value={pageForm.gridSpan} onChange={(e) => setPageForm({ ...pageForm, gridSpan: Number(e.target.value) })}><option value={3}>3 (quarter)</option><option value={4}>4 (third)</option><option value={6}>6 (half)</option><option value={12}>12 (full width)</option></select></label>
+                  <label>Homepage order <input type="number" value={pageForm.homepageOrder} onChange={(e) => setPageForm({ ...pageForm, homepageOrder: Number(e.target.value) })} /></label>
+                  <label className={styles.checkboxLabel}><input type="checkbox" checked={pageForm.showOnHomepage} onChange={(e) => setPageForm({ ...pageForm, showOnHomepage: e.target.checked })} /> Show on homepage</label>
+                  <label className={styles.checkboxLabel}><input type="checkbox" checked={pageForm.showInNav} onChange={(e) => setPageForm({ ...pageForm, showInNav: e.target.checked })} /> Show in navigation</label>
+                  <label className={styles.checkboxLabel}><input type="checkbox" checked={pageForm.isPublished} onChange={(e) => setPageForm({ ...pageForm, isPublished: e.target.checked })} /> Published</label>
+                  <fieldset className={styles.fieldset}>
+                    <legend>Page body</legend>
+                    <div className={styles.quillWrap}>
+                      <KittyQuill value={pageForm.body} onChange={(html) => setPageForm({ ...pageForm, body: html })} />
+                    </div>
+                  </fieldset>
+                  <div className={styles.inlineActions}>
+                    <button type="submit">{editingPageId ? 'Update Page' : 'Create Page'}</button>
+                    {editingPageId ? <button type="button" className={styles.secondaryBtn} onClick={() => { setEditingPageId(null); setPageForm({ title: '', slug: '', icon: '', subtitle: '', body: '', showInNav: true, isPublished: false, sortOrder: 0 }); }}>Cancel</button> : null}
+                  </div>
+                </form>
+              </section>
+              <section className={styles.section}>
+                <h2>Pages ({adminPages.length})</h2>
+                <div className={styles.storyList}>
+                  {adminPages.map((pg) => (
+                    <article key={pg.id} className={styles.storyCard}>
+                      <header>
+                        <strong>{pg.icon ? `${pg.icon} ` : ''}{pg.title}</strong>
+                        <span>{pg.isPublished ? 'Published' : 'Draft'} &middot; /{pg.slug}</span>
+                      </header>
+                      {pg.subtitle ? <p className={styles.help}>{pg.subtitle}</p> : null}
+                      <p className={styles.help}>Sort: {pg.sortOrder} &middot; Nav: {pg.showInNav ? 'Yes' : 'No'}</p>
+                      <div className={styles.inlineActions}>
+                        <button type="button" onClick={() => handleEditPage(pg)}>Edit</button>
+                        <button type="button" onClick={() => handleDeletePage(pg.id)}>Delete</button>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+                {adminPages.length === 0 ? <p className={styles.help}>No pages yet. Create one above.</p> : null}
+              </section>
+            </>
+          )}
+        </div>
+
+        <div
           id="admin-panel-people"
           role="tabpanel"
           aria-labelledby="admin-tab-people"
@@ -1322,6 +1448,129 @@ useEffect(() => {
               </div>
               {adminVotes.length === 0 ? <p className={styles.help}>No votes yet.</p> : null}
             </section>
+          )}
+        </div>
+
+        <div
+          id="admin-panel-expenses"
+          role="tabpanel"
+          aria-labelledby="admin-tab-expenses"
+          hidden={activeTab !== 'expenses'}
+        >
+          {activeTab === 'expenses' && (
+            <>
+              <div className={styles.expenseFormsRow}>
+              <section className={styles.section}>
+                <h2>{editingExpenseId ? 'Edit Expense' : 'Add Expense'}</h2>
+                <form onSubmit={handleSaveExpense} className={styles.form}>
+                  <label>Title <input value={expenseForm.title} onChange={(e) => setExpenseForm({ ...expenseForm, title: e.target.value })} /></label>
+                  <label>Notes <input value={expenseForm.notes} onChange={(e) => setExpenseForm({ ...expenseForm, notes: e.target.value })} /></label>
+                  <label>Date <input type="date" value={expenseForm.expenseDate} onChange={(e) => setExpenseForm({ ...expenseForm, expenseDate: e.target.value })} /></label>
+                  <fieldset className={styles.fieldset}>
+                    <legend>Splits</legend>
+                    {expenseForm.splits.map((split, idx) => (
+                      <div key={idx} className={styles.inlineActions}>
+                        <select value={split.userId} onChange={(e) => updateSplitRow(idx, 'userId', e.target.value)}>
+                          <option value="">Select person</option>
+                          {users.filter((u) => !u.isAdmin).map((u) => <option key={u.id} value={u.id}>{u.name}</option>)}
+                        </select>
+                        <input type="number" step="0.01" placeholder="£0.00" value={split.amount} onChange={(e) => updateSplitRow(idx, 'amount', e.target.value)} style={{ width: 120 }} />
+                        {expenseForm.splits.length > 1 ? <button type="button" onClick={() => removeSplitRow(idx)}>✕</button> : null}
+                      </div>
+                    ))}
+                    <button type="button" className={styles.secondaryBtn} onClick={addSplitRow}>+ Add split</button>
+                  </fieldset>
+                  <div className={styles.inlineActions}>
+                    <button type="submit">{editingExpenseId ? 'Update' : 'Create'} Expense</button>
+                    {editingExpenseId ? <button type="button" className={styles.secondaryBtn} onClick={resetExpenseForm}>Cancel</button> : null}
+                  </div>
+                </form>
+              </section>
+
+              <section className={styles.section}>
+                <h2>Record Payment</h2>
+                <form onSubmit={handleCreatePayment} className={styles.form}>
+                  <label>Person
+                    <select value={paymentForm.userId} onChange={(e) => setPaymentForm({ ...paymentForm, userId: e.target.value })}>
+                      <option value="">Select person</option>
+                      {users.filter((u) => !u.isAdmin).map((u) => <option key={u.id} value={u.id}>{u.name}</option>)}
+                    </select>
+                  </label>
+                  <label>Linked expense (optional)
+                    <select value={paymentForm.expenseId} onChange={(e) => setPaymentForm({ ...paymentForm, expenseId: e.target.value })}>
+                      <option value="">None</option>
+                      {adminExpenses.map((exp) => <option key={exp.id} value={exp.id}>{exp.title}</option>)}
+                    </select>
+                  </label>
+                  <label>Amount (£) <input type="number" step="0.01" placeholder="0.00" value={paymentForm.amount} onChange={(e) => setPaymentForm({ ...paymentForm, amount: e.target.value })} /></label>
+                  <label>Date <input type="date" value={paymentForm.paymentDate} onChange={(e) => setPaymentForm({ ...paymentForm, paymentDate: e.target.value })} /></label>
+                  <label>Notes <input value={paymentForm.notes} onChange={(e) => setPaymentForm({ ...paymentForm, notes: e.target.value })} /></label>
+                  <button type="submit">Record Payment</button>
+                </form>
+              </section>
+              </div>
+
+              <section className={styles.section}>
+                <h2>Balances</h2>
+                {adminBalances.length > 0 ? (
+                  <table className={styles.expenseTable}>
+                    <thead><tr><th>Name</th><th>Owed</th><th>Paid</th><th>Balance</th></tr></thead>
+                    <tbody>
+                      {adminBalances.map((b) => (
+                        <tr key={b.userId}>
+                          <td>{b.name}</td>
+                          <td>£{((b.owedPence || 0) / 100).toFixed(2)}</td>
+                          <td>£{((b.paidPence || 0) / 100).toFixed(2)}</td>
+                          <td style={{ color: (b.balancePence || 0) >= 0 ? '#0a7f2e' : '#b91c1c', fontWeight: 700 }}>
+                            £{((b.balancePence || 0) / 100).toFixed(2)}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                ) : <p className={styles.help}>No balance data yet.</p>}
+              </section>
+
+              <section className={styles.section}>
+                <h2>Expenses ({adminExpenses.length})</h2>
+                <div className={styles.storyList}>
+                  {adminExpenses.map((exp) => (
+                    <article key={exp.id} className={styles.storyCard}>
+                      <header>
+                        <strong>{exp.title}</strong>
+                        <span>{exp.expense_date || 'No date'}</span>
+                      </header>
+                      {exp.notes ? <p className={styles.help}>{exp.notes}</p> : null}
+                      <p>Total: £{((exp.totalPence || 0) / 100).toFixed(2)} · {exp.splits?.length || 0} splits · {exp.payments?.length || 0} payments</p>
+                      <div className={styles.inlineActions}>
+                        <button type="button" onClick={() => startEditExpense(exp)}>Edit</button>
+                        <button type="button" onClick={() => handleDeleteExpense(exp.id)}>Delete</button>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+                {adminExpenses.length === 0 ? <p className={styles.help}>No expenses yet.</p> : null}
+              </section>
+
+              <section className={styles.section}>
+                <h2>Payments ({adminPayments.length})</h2>
+                <div className={styles.storyList}>
+                  {adminPayments.map((pay) => (
+                    <article key={pay.id} className={styles.storyCard}>
+                      <header>
+                        <strong>{pay.userName || 'Unknown'}</strong>
+                        <span>£{((pay.amountPence || 0) / 100).toFixed(2)}</span>
+                      </header>
+                      <p className={styles.help}>{pay.notes || ''} {pay.paymentDate ? `· ${pay.paymentDate}` : ''}</p>
+                      <div className={styles.inlineActions}>
+                        <button type="button" onClick={() => handleDeletePayment(pay.id)}>Delete</button>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+                {adminPayments.length === 0 ? <p className={styles.help}>No payments yet.</p> : null}
+              </section>
+            </>
           )}
         </div>
 

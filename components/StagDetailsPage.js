@@ -12,6 +12,7 @@ export default function StagDetailsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [content, setContent] = useState(defaultContent);
   const [attendingUsers, setAttendingUsers] = useState([]);
+  const [cmsPages, setCmsPages] = useState([]);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -41,6 +42,11 @@ export default function StagDetailsPage() {
             );
             setAttendingUsers(attending);
           }
+
+          const pagesRes = await fetch('/api/pages');
+          if (pagesRes.ok) {
+            setCmsPages(await pagesRes.json());
+          }
         }
       } catch (err) {
         router.push('/login');
@@ -60,6 +66,10 @@ export default function StagDetailsPage() {
     return null;
   }
 
+  const homepageCards = cmsPages
+    .filter((p) => p.showOnHomepage)
+    .sort((a, b) => (a.homepageOrder || 0) - (b.homepageOrder || 0));
+
   return (
     <Layout isAuthenticated={isAuthenticated} user={user}>
       <div className={styles.container}>
@@ -76,44 +86,21 @@ export default function StagDetailsPage() {
         </div>
 
         <div className={styles.bento}>
-          <section className={`${styles.card} ${styles.whenCard}`}>
-            <div className={styles.icon}>📅</div>
-            <h2>When</h2>
-            <p className={styles.highlight}>{content.detailsWhen}</p>
-            <p>{content.detailsWhenDescription}</p>
-          </section>
+          {/* Dynamic CMS cards */}
+          {homepageCards.map((pg) => (
+            <Link
+              key={pg.id}
+              href={`/p/${pg.slug}`}
+              className={styles.card}
+              style={{ gridColumn: `span ${pg.gridSpan || 4}`, textDecoration: 'none', color: 'inherit' }}
+            >
+              {pg.icon && <div className={styles.icon}>{pg.icon}</div>}
+              <h2>{pg.title}</h2>
+              {pg.subtitle && <p>{pg.subtitle}</p>}
+            </Link>
+          ))}
 
-          <section className={`${styles.card} ${styles.whereCard}`}>
-            <div className={styles.icon}>📍</div>
-            <h2>Where</h2>
-            <p className={styles.highlight}>{content.detailsWhere}</p>
-            <p>{content.detailsWhereDescription}</p>
-            {content.detailsWhereMapEmbedUrl ? (
-              <div className={styles.mapWrap}>
-                <iframe
-                  src={content.detailsWhereMapEmbedUrl}
-                  className={styles.mapFrame}
-                  loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
-                  allowFullScreen
-                  title="Stag do location map"
-                />
-              </div>
-            ) : null}
-            <div className={styles.whereLinks}>
-              {content.detailsWhereMapLinkUrl ? (
-                <a href={content.detailsWhereMapLinkUrl} target="_blank" rel="noreferrer">
-                  Open in Google Maps
-                </a>
-              ) : null}
-              {content.detailsAccommodationUrl ? (
-                <a href={content.detailsAccommodationUrl} target="_blank" rel="noreferrer">
-                  View Accommodation
-                </a>
-              ) : null}
-            </div>
-          </section>
-
+          {/* Built-in Who card (uses live attendee data) */}
           <section className={`${styles.card} ${styles.whoCard}`}>
             <div className={styles.icon}>👥</div>
             <h2>Who</h2>
@@ -141,33 +128,21 @@ export default function StagDetailsPage() {
             </div>
           </section>
 
-          <section className={`${styles.card} ${styles.costCard}`}>
-            <div className={styles.icon}>💰</div>
-            <h2>Cost</h2>
-            <p className={styles.highlight}>{content.detailsCost}</p>
-            <p>{content.detailsCostDescription}</p>
-          </section>
-
-          <section className={`${styles.card} ${styles.bringCard}`}>
-            <h2>What to Bring</h2>
-            <ul className={styles.list}>
-              {content.detailsBring.split('\n').filter(Boolean).map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-          </section>
-
-          <section className={`${styles.card} ${styles.itineraryCard}`}>
-            <h2>Itinerary</h2>
-            <p>{content.detailsItinerary}</p>
-          </section>
-
-          <section className={`${styles.card} ${styles.questionsCard}`}>
-            <h2>Questions?</h2>
-            <p>
-              Have questions about the stag do? Drop them in the chat (coming soon) or reach out to the group.
-            </p>
-          </section>
+          {/* Nav-only pages (not on homepage but published) */}
+          {cmsPages.filter((p) => !p.showOnHomepage).length > 0 && (
+            <section className={`${styles.card} ${styles.pagesCard}`}>
+              <h2>More to explore</h2>
+              <div className={styles.pagesGrid}>
+                {cmsPages.filter((p) => !p.showOnHomepage).map((pg) => (
+                  <Link key={pg.id} href={`/p/${pg.slug}`} className={styles.pageLink}>
+                    {pg.icon && <span className={styles.pageIcon}>{pg.icon}</span>}
+                    <strong>{pg.title}</strong>
+                    {pg.subtitle && <p className={styles.pageSub}>{pg.subtitle}</p>}
+                  </Link>
+                ))}
+              </div>
+            </section>
+          )}
         </div>
       </div>
     </Layout>

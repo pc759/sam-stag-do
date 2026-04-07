@@ -6,6 +6,7 @@ import styles from '../styles/Stories.module.css';
 export default function Stories() {
   const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [stories, setStories] = useState([]);
   const [author, setAuthor] = useState('');
@@ -20,7 +21,9 @@ export default function Stories() {
         if (res.status === 401) {
           router.push('/login');
         } else {
+          const authData = await res.json();
           setIsAuthenticated(true);
+          setUser(authData.user);
           fetchStories();
         }
       } catch (err) {
@@ -52,7 +55,7 @@ export default function Stories() {
       const res = await fetch('/api/stories', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ author, story }),
+        body: JSON.stringify({ author: author || user?.name, story }),
       });
 
       if (res.ok) {
@@ -80,10 +83,12 @@ export default function Stories() {
   }
 
   return (
-    <Layout isAuthenticated={isAuthenticated}>
+    <Layout isAuthenticated={isAuthenticated} user={user}>
       <div className={styles.container}>
-        <h1>Sam's Questionable Choices</h1>
-        <p className={styles.subtitle}>A repository of embarrassing stories and moments we'll never let him forget</p>
+        <h1>Sam&apos;s Questionable Choices</h1>
+        <p className={styles.subtitle}>
+          A repository of embarrassing stories and moments we&apos;ll never let him forget
+        </p>
 
         <div className={styles.formSection}>
           <h2>Add Your Story</h2>

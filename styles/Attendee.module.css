@@ -1,0 +1,158 @@
+.container {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  color: var(--page-text);
+}
+
+.container h1 {
+  color: var(--page-text);
+}
+
+.backBtn {
+  border: 0;
+  background: transparent;
+  color: var(--accent);
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 0.5rem;
+}
+
+.avatarWrap {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  margin: 0.5rem 0 1rem;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+}
+
+.avatarPlaceholder {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #f3f4f6;
+  font-size: 2rem;
+}
+
+.avatarMurdered .avatar,
+.avatarMurdered .avatarPlaceholder {
+  filter: grayscale(1) brightness(0.85);
+}
+
+.avatarMurdered::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: rgba(127, 29, 29, 0.45);
+  pointer-events: none;
+}
+
+.mobileRow {
+  margin: 0 0 0.8rem;
+  color: var(--card-body);
+}
+
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+}
+
+.badge {
+  color: #fff;
+  border-radius: 999px;
+  padding: 0.25rem 0.55rem;
+  font-size: 0.85rem;
+}
+
+.tagManager {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #fff;
+  padding: 0.8rem;
+  margin-bottom: 1rem;
+}
+
+.tagManager h2 {
+  margin: 0 0 0.6rem;
+  font-size: 1rem;
+}
+
+.tagButtons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.tagOn,
+.tagOff {
+  border: 0;
+  border-radius: 999px;
+  color: #fff;
+  padding: 0.35rem 0.65rem;
+  cursor: pointer;
+}
+
+.tagOn {
+  background: #1f2937;
+}
+
+.tagOff {
+  background: #6b7280;
+}
+
+.form {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.form label {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.form input,
+.form textarea {
+  width: 100%;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 0.5rem 0.65rem;
+}
+
+.form button {
+  width: fit-content;
+  border: 0;
+  border-radius: 6px;
+  background: #111827;
+  color: #fff;
+  padding: 0.5rem 0.8rem;
+}
+
+.status {
+  color: #166534;
+}
+
+.readOnly {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 0.8rem;
+  background: #fff;
+}
+
+.loading {
+  padding: 2rem;
+  text-align: center;
+}

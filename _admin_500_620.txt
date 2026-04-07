@@ -1,0 +1,121 @@
+ 500:       })
+ 501:     });
+ 502:     if (res.ok) {
+ 503:       setNewVoteTitle('');
+ 504:       setVoteParticipantIds(new Set());
+ 505:       setVoteCandidateIds(new Set());
+ 506:       setStatus('Vote created (draft). Open it when ready.');
+ 507:       fetchAdminVotes();
+ 508:     } else {
+ 509:       setStatus('Failed to create vote.');
+ 510:     }
+ 511:   };
+ 512: 
+ 513:   const voteAction = async (voteId, action) => {
+ 514:     const res = await fetch('/api/admin/votes', {
+ 515:       method: 'PATCH',
+ 516:       headers: { 'Content-Type': 'application/json' },
+ 517:       body: JSON.stringify({ id: voteId, action })
+ 518:     });
+ 519:     if (res.ok) {
+ 520:       fetchAdminVotes();
+ 521:       setStatus('Vote updated.');
+ 522:     }
+ 523:   };
+ 524: 
+ 525:   useEffect(() => {
+ 526: useEffect(() => {
+ 527: if (!isAuthenticated || !user?.isAdmin || activeTab !== 'traitors') {
+ 528: return;
+ 529: }
+ 530: fetchAdminVotes();
+ 531: }, [isAuthenticated, user?.isAdmin, activeTab]);
+ 532: 
+ 533: useEffect(() => {
+ 534: if (!isAuthenticated || !user?.isAdmin || activeTab !== 'expenses') {
+ 535: return;
+ 536: }
+ 537: Promise.all([fetchAdminExpenses(), fetchAdminPayments()]);
+ 538: }, [isAuthenticated, user?.isAdmin, activeTab]);
+ 539:   const handleSetAdminPassword = async (e) => {
+ 540:     e.preventDefault();
+ 541:     if (!adminPassword.trim() || !user?.id) return;
+ 542:     const res = await fetch('/api/admin/users', {
+ 543:       method: 'PATCH',
+ 544:       headers: { 'Content-Type': 'application/json' },
+ 545:       body: JSON.stringify({ userId: user.id, password: adminPassword })
+ 546:     });
+ 547:     if (res.ok) {
+ 548:       setStatus('Admin password updated.');
+ 549:       setAdminPassword('');
+ 550:     } else {
+ 551:       setStatus('Failed to update admin password.');
+ 552:     }
+ 553:   };
+ 554: 
+ 555:   const handleDeleteTag = async (tagId) => {
+ 556:     const res = await fetch(`/api/admin/tags?id=${tagId}`, { method: 'DELETE' });
+ 557:     if (res.ok) {
+ 558:       fetchTags();
+ 559:       fetchRosterUsers();
+ 560:       setStatus('Tag removed.');
+ 561:     }
+ 562:   };
+ 563: 
+ 564:   const fetchRosterUsers = async () => {
+ 565:     const rosterRes = await fetch('/api/roster');
+ 566:     if (!rosterRes.ok) return;
+ 567:     const roster = await rosterRes.json();
+ 568:     setUsers((prev) =>
+ 569:       prev.map((u) => {
+ 570:         const rosterUser = roster.find((r) => r.id === u.id);
+ 571:         return rosterUser ? { ...u, tags: rosterUser.tags } : u;
+ 572:       })
+ 573:     );
+ 574:   };
+ 575: 
+ 576:   const toggleUserTag = async (userId, tagId, enabled) => {
+ 577:     await fetch('/api/admin/user-tags', {
+ 578:       method: 'POST',
+ 579:       headers: { 'Content-Type': 'application/json' },
+ 580:       body: JSON.stringify({ userId, tagId, enabled })
+ 581:     });
+ 582:     fetchRosterUsers();
+ 583:   };
+ 584: 
+ 585:   if (isLoading) {
+ 586:     return <div className={styles.loading}>Loading...</div>;
+ 587:   }
+ 588: 
+ 589:   if (!isAuthenticated) {
+ 590:     return null;
+ 591:   }
+ 592: 
+ 593:   return (
+ 594:     <Layout isAuthenticated={isAuthenticated} user={user}>
+ 595:       <div className={styles.container}>
+ 596:         <h1>Admin CMS</h1>
+ 597:         <p className={styles.subtitle}>Manage content, attendees, passwords, and gamer-tag badges.</p>
+ 598: 
+ 599:         <div className={styles.tabList} role="tablist" aria-label="Admin sections">
+ 600:           {TABS.map((tab, index) => (
+ 601:             <button
+ 602:               key={tab.id}
+ 603:               type="button"
+ 604:               role="tab"
+ 605:               className={activeTab === tab.id ? styles.tabActive : styles.tab}
+ 606:               id={`admin-tab-${tab.id}`}
+ 607:               aria-selected={activeTab === tab.id}
+ 608:               aria-controls={`admin-panel-${tab.id}`}
+ 609:               tabIndex={activeTab === tab.id ? 0 : -1}
+ 610:               onClick={() => selectTab(tab.id)}
+ 611:               onKeyDown={(e) => onTabKeyDown(e, index)}
+ 612:             >
+ 613:               {tab.label}
+ 614:             </button>
+ 615:           ))}
+ 616:         </div>
+ 617: 
+ 618:         {status ? <p className={styles.status}>{status}</p> : null}
+ 619: 
+ 620:         <div

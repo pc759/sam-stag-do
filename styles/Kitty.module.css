@@ -1,0 +1,79 @@
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  animation: fadeIn 0.4s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.loading {
+  text-align: center;
+  padding: 2rem;
+}
+
+.hero {
+  margin-bottom: 1.25rem;
+}
+
+.hero h1 {
+  margin: 0;
+  color: var(--page-text);
+  font-size: 2rem;
+}
+
+.subtitle {
+  color: var(--page-text-muted);
+  margin: 0.35rem 0 0;
+}
+
+.prose {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 1.25rem 1.5rem;
+  box-shadow: 0 8px 22px rgba(17, 24, 39, 0.08);
+  color: var(--card-body);
+  line-height: 1.6;
+}
+
+.prose :global(h1),
+.prose :global(h2),
+.prose :global(h3) {
+  margin: 1rem 0 0.5rem;
+  color: var(--card-heading);
+}
+
+.prose :global(h1:first-child),
+.prose :global(h2:first-child),
+.prose :global(h3:first-child) {
+  margin-top: 0;
+}
+
+.prose :global(p) {
+  margin: 0.65rem 0;
+}
+
+.prose :global(ul),
+.prose :global(ol) {
+  margin: 0.65rem 0;
+  padding-left: 1.35rem;
+}
+
+.prose :global(a) {
+  color: var(--accent);
+}
+
+.empty {
+  color: var(--card-muted);
+  font-style: italic;
+}

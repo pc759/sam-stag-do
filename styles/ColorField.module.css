@@ -1,0 +1,99 @@
+.wrap {
+  position: relative;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.primaryLabel {
+  font-weight: 600;
+}
+
+.hint {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 400;
+  color: var(--card-muted);
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.swatchBtn {
+  padding: 0;
+  border: 2px solid rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+  cursor: pointer;
+  background: transparent;
+  line-height: 0;
+  flex-shrink: 0;
+}
+
+.swatchBtn:focus-visible {
+  outline: 2px solid var(--accent, #c9a227);
+  outline-offset: 2px;
+}
+
+.swatch {
+  display: block;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 6px;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08);
+}
+
+.chooseBtn {
+  font: inherit;
+  padding: 0.45rem 0.65rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  background: #f9fafb;
+  cursor: pointer;
+}
+
+.chooseBtn:hover {
+  background: #f3f4f6;
+}
+
+.chooseBtn:focus-visible {
+  outline: 2px solid var(--accent, #c9a227);
+  outline-offset: 2px;
+}
+
+.hexInput {
+  min-width: 7.5rem;
+  padding: 0.45rem 0.55rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font: inherit;
+}
+
+.hexInput:focus {
+  outline: 2px solid var(--accent, #c9a227);
+  outline-offset: 1px;
+}
+
+.popover {
+  position: absolute;
+  left: 0;
+  top: calc(100% + 0.35rem);
+  z-index: 40;
+  padding: 0.5rem;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
+}
+
+.picker {
+  width: 200px;
+  max-width: min(200px, calc(100vw - 2rem));
+}
+
+.picker:focus-within {
+  outline: 2px solid var(--accent, #c9a227);
+  outline-offset: 3px;
+}

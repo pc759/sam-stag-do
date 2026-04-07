@@ -1,0 +1,400 @@
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.subtitle {
+  color: var(--card-muted);
+  margin-bottom: 1.5rem;
+}
+
+.section {
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: 10px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.section h2 {
+  color: var(--card-heading);
+}
+
+.form {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.form label {
+  display: grid;
+  gap: 0.35rem;
+  font-weight: 600;
+}
+
+.form input,
+.form textarea,
+.form select {
+  width: 100%;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 0.5rem 0.65rem;
+  font: inherit;
+  font-weight: 400;
+}
+
+.form button {
+  width: fit-content;
+  border: 0;
+  border-radius: 6px;
+  background: #111;
+  color: #fff;
+  padding: 0.6rem 0.85rem;
+  cursor: pointer;
+}
+
+.status {
+  color: #0a7f2e;
+  font-weight: 600;
+}
+
+.storyList {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.storyCard {
+  border: 1px solid #eee;
+  border-radius: 8px;
+  padding: 0.75rem;
+}
+
+.storyCard header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.storyCard button {
+  border: 0;
+  border-radius: 6px;
+  padding: 0.4rem 0.65rem;
+  background: #a91c1c;
+  color: #fff;
+  cursor: pointer;
+}
+
+.inlineActions {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.tagRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.tagOn,
+.tagOff {
+  border: 0;
+  border-radius: 999px;
+  padding: 0.3rem 0.65rem;
+  color: #fff;
+  cursor: pointer;
+}
+
+.tagOn {
+  background: #1f2937;
+}
+
+.tagOff {
+  background: #6b7280;
+}
+
+.loading {
+  padding: 2rem;
+  text-align: center;
+}
+
+.tabList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid #e5e5e5;
+  padding-bottom: 0.5rem;
+}
+
+.tab,
+.tabActive {
+  border: 1px solid #ccc;
+  background: #f9f9f9;
+  padding: 0.45rem 0.75rem;
+  border-radius: 6px 6px 0 0;
+  cursor: pointer;
+  font: inherit;
+  margin-bottom: -1px;
+}
+
+.tabActive {
+  background: #fff;
+  border-bottom-color: #fff;
+  font-weight: 700;
+  color: var(--accent, #1a1a1a);
+}
+
+.tab:hover {
+  background: #f0f0f0;
+}
+
+.help {
+  font-size: 0.9rem;
+  color: var(--card-muted);
+  margin: 0 0 1rem 0;
+  line-height: 1.45;
+}
+
+.fieldset {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 0.75rem 1rem 1rem;
+  margin: 0 0 1rem 0;
+}
+
+.fieldset legend {
+  font-weight: 700;
+  padding: 0 0.35rem;
+}
+
+.colorGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.logoPreview {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.logoPreviewCircle {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid rgba(45, 74, 62, 0.75);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  background: #f5f0e6;
+  flex-shrink: 0;
+}
+
+.logoPreviewCircle img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 6px;
+  display: block;
+}
+
+.secondaryBtn {
+  border: 1px solid #333;
+  background: #fff;
+  color: #111;
+  padding: 0.4rem 0.65rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font: inherit;
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+}
+
+.checkboxLabel input {
+  width: auto;
+}
+
+.tagDefinitions {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.tagDefinitionCard {
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  padding: 0.75rem;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.tagDefinitionHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.tagDefinitionHead button {
+  background: #a91c1c;
+  color: #fff;
+  border: 0;
+  border-radius: 6px;
+  padding: 0.35rem 0.65rem;
+  cursor: pointer;
+  font: inherit;
+}
+
+.tagPill {
+  border-radius: 999px;
+  color: #fff;
+  padding: 0.35rem 0.65rem;
+  font-size: 0.95rem;
+}
+
+.tagDefinitionCard label {
+  font-weight: 600;
+}
+
+.tagDefinitionCard select {
+  width: 100%;
+  max-width: 280px;
+  margin-top: 0.25rem;
+  display: block;
+  font-weight: 400;
+}
+
+.voteUserGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.75rem;
+}
+
+.voteUserCard {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0.75rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #fff;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    background 0.15s ease;
+}
+
+.voteUserCard:has(input:checked) {
+  border-color: var(--accent, #c9a227);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 45%, transparent);
+  background: #fafaf8;
+}
+
+.voteUserCard:focus-within {
+  outline: 2px solid var(--accent, #c9a227);
+  outline-offset: 2px;
+}
+
+.voteUserCardInput {
+  margin-top: 0.2rem;
+  flex-shrink: 0;
+}
+
+.voteUserCardBody {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.voteUserCardName {
+  font-weight: 600;
+  color: var(--card-heading);
+  font-size: 0.95rem;
+}
+
+.voteUserCardTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.voteTagChip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+  line-height: 1;
+  padding: 0.2rem 0.32rem;
+  min-width: 1.5rem;
+  border-radius: 999px;
+  color: #fff;
+  max-width: 100%;
+}
+
+.voteNoTags {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--card-muted);
+}
+
+.storyCard .inlineActions button {
+  background: #1f2937;
+  color: #fff;
+}
+
+.quillWrap {
+  margin-top: 0.5rem;
+}
+
+.quillWrap :global(.ql-container) {
+  min-height: 180px;
+  font-size: 1rem;
+}
+
+.expenseTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1rem;
+}
+
+.expenseTable th,
+.expenseTable td {
+  text-align: left;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.expenseTable th {
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--card-muted, #666);
+}
+
+.expenseFormsRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  align-items: start;
+}
+
+@media (max-width: 768px) {
+  .expenseFormsRow {
+    grid-template-columns: 1fr;
+  }
+}

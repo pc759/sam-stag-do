@@ -1,0 +1,104 @@
+.container {
+  animation: fadeIn 0.4s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: linear-gradient(
+    135deg,
+    var(--grad-start) 0%,
+    var(--grad-end) 100%
+  );
+  color: var(--page-text);
+  font-size: 1.25rem;
+}
+
+.hero {
+  margin-bottom: 1.5rem;
+  text-align: center;
+  color: var(--page-text);
+}
+
+.hero h1 {
+  margin: 0;
+  font-size: 2rem;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+}
+
+.subtitle {
+  margin: 0.5rem 0 0;
+  color: var(--page-text-muted);
+  font-size: 1.05rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.25rem;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 1.5rem;
+  box-shadow: 0 8px 22px rgba(17, 24, 39, 0.08);
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 28px rgba(17, 24, 39, 0.12);
+}
+
+.cardIcon {
+  font-size: 2.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.card h2 {
+  margin: 0 0 0.5rem;
+  color: var(--card-heading);
+  font-size: 1.25rem;
+}
+
+.card p {
+  margin: 0 0 1rem;
+  color: var(--card-muted);
+  line-height: 1.5;
+  flex: 1;
+}
+
+.cardCta {
+  color: var(--accent);
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.card:hover .cardCta {
+  color: var(--accent-hover);
+}
+
+@media (max-width: 640px) {
+  .hero h1 {
+    font-size: 1.65rem;
+  }
+}

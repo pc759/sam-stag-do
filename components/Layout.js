@@ -64,13 +64,6 @@ export default function Layout({ children, isAuthenticated, user }) {
                     {item.label} &#9662;
                   </button>
                   <div className={styles.navDropdownMenu}>
-                    <Link
-                      href={item.url}
-                      className={`${styles.navLink} ${isActive(item.url) ? styles.active : ''}`}
-                      {...(item.openInNewTab ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
-                    >
-                      {item.label}
-                    </Link>
                     {item.children.map((child) => (
                       <Link
                         key={child.id}

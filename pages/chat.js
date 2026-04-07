@@ -12,7 +12,7 @@ export default function ChatPage() {
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
-      text: "Tell me a memory about Sam and I'll help you flesh it out with fun details."
+      text: "Troubled soul, unburden yourself... tell me about Sam's sins and I shall dispense wisdom, judgment, and probably ridicule."
     }
   ]);
   const [input, setInput] = useState('');
@@ -89,7 +89,7 @@ export default function ChatPage() {
     <Layout isAuthenticated={isAuthenticated} user={user}>
       <div className={styles.container}>
         <div className={styles.chatHeader}>
-          <h1>Memory Wingman Chat</h1>
+          <h1>Dear Stagony Aunt</h1>
           <button
             type="button"
             className={styles.newChatBtn}
@@ -98,7 +98,7 @@ export default function ChatPage() {
               setMessages([
                 {
                   role: 'assistant',
-                  text: "Tell me a memory about Sam and I'll help you flesh it out with fun details."
+                  text: "Troubled soul, unburden yourself... tell me about Sam's sins and I shall dispense wisdom, judgment, and probably ridicule."
                 }
               ]);
               setError('');
@@ -128,7 +128,7 @@ export default function ChatPage() {
         <form className={styles.form} onSubmit={sendMessage}>
           <textarea
             rows="3"
-            placeholder="Drop a memory about Sam..."
+            placeholder="Dear Stagony Aunt, I need to tell you about the time Sam..."
             value={input}
             onChange={(e) => setInput(e.target.value)}
             disabled={!chatEnabled || isSending}

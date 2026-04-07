@@ -51,11 +51,11 @@ export default function ShameVault() {
           </Link>
           <Link href="/chat" className={styles.card}>
             <span className={styles.cardIcon} aria-hidden="true">
-              🤖
+              💌
             </span>
-            <h2>Chat with Simtheory</h2>
-            <p>Discuss a memory and let Simtheory help you pad out the details.</p>
-            <span className={styles.cardCta}>Open chat →</span>
+            <h2>Dear Stagony Aunt</h2>
+            <p>Got a problem? Got a Sam story? Write in and let the Stagony Aunt roast him for you.</p>
+            <span className={styles.cardCta}>Write in →</span>
           </Link>
         </div>
       </div>

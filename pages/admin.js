@@ -1113,15 +1113,15 @@ useEffect(() => {
                   </select>
                 </label>
                 <label>
-                  Simtheory model (optional)
+                  Stagony Aunt model (optional)
                   <input
                     value={content.chatModel}
                     onChange={(e) => setContent({ ...content, chatModel: e.target.value })}
-                    placeholder="Leave blank unless Simtheory docs require a model id"
+                    placeholder="Leave blank unless docs require a specific model id"
                   />
                 </label>
                 <label>
-                  Chat System Instructions
+                  Stagony Aunt System Prompt
                   <textarea
                     rows="5"
                     value={content.chatSystemPrompt}
@@ -1145,7 +1145,7 @@ useEffect(() => {
                 </button>
               </form>
               <p className={styles.help}>
-                Simtheory API key is read from server env var <code>SIMTHEORY_API_KEY</code>.
+                Stagony Aunt API key is read from server env var <code>SIMTHEORY_API_KEY</code>.
                 Optional: override endpoint with <code>SIMTHEORY_CHAT_URL</code> (defaults to
                 Cartwright).
               </p>

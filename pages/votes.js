@@ -53,7 +53,7 @@ export default function VotesList() {
           {cmsPage?.subtitle || "Cast your vote while a round is open. You won't see who anyone else voted for. After a vote closes, everyone sees totals only."}
         </p>
         {cmsPage?.body?.trim() && (
-          <div style={{marginBottom:'1.5rem'}}><MarkdownRenderer content={cmsPage.body} /></div>
+          <div style={{marginBottom:'1.5rem',background:'#fff',border:'1px solid #e5e7eb',borderRadius:'14px',padding:'1.5rem 2rem',color:'#1f2937',boxShadow:'0 8px 22px rgba(17,24,39,0.08)'}}><MarkdownRenderer content={cmsPage.body} /></div>
         )}
         {votes.length === 0 ? (
           <p>No votes yet.</p>

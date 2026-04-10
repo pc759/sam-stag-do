@@ -114,7 +114,7 @@ export default function ChatPage() {
           </button>
         </div>
         {cmsPage?.body?.trim() && (
-          <div style={{marginBottom:'1rem'}}><MarkdownRenderer content={cmsPage.body} /></div>
+          <div style={{marginBottom:'1rem',background:'#fff',border:'1px solid #e5e7eb',borderRadius:'14px',padding:'1.5rem 2rem',color:'#1f2937',boxShadow:'0 8px 22px rgba(17,24,39,0.08)'}}><MarkdownRenderer content={cmsPage.body} /></div>
         )}
         {!chatEnabled && (
           <p className={styles.disabled}>

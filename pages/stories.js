@@ -95,7 +95,7 @@ export default function Stories() {
           {cmsPage?.subtitle || "A repository of embarrassing stories and moments we'll never let him forget"}
         </p>
         {cmsPage?.body?.trim() && (
-          <div style={{marginBottom:'1.5rem'}}><MarkdownRenderer content={cmsPage.body} /></div>
+          <div style={{marginBottom:'1.5rem',background:'#fff',border:'1px solid #e5e7eb',borderRadius:'14px',padding:'1.5rem 2rem',color:'#1f2937',boxShadow:'0 8px 22px rgba(17,24,39,0.08)'}}><MarkdownRenderer content={cmsPage.body} /></div>
         )}
 
         <div className={styles.formSection}>

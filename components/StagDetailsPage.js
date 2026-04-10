@@ -56,19 +56,22 @@ export default function StagDetailsPage() {
   return (
     <Layout>
       <div className={styles.container}>
-        <div className={styles.heroWrap}>
-          <div className={styles.fogLayer} aria-hidden="true">
-            <span className={styles.fogA} />
-            <span className={styles.fogB} />
-          </div>
-          <header className={styles.hero}>
-            <p className={styles.kicker}>Stag HQ</p>
-            <h1>Stag Do Details</h1>
-            <p className={styles.subtitle}>Everything you need to know about the weekend</p>
-          </header>
-        </div>
-
         <div className={styles.bento}>
+          {/* Logo + Title row */}
+          <div className={`${styles.card} ${styles.logoCard}`} style={{ gridColumn: 'span 4' }}>
+            <div className={styles.logoCardInner}>
+              <img
+                src={content.siteLogoUrl || '/brand/logo.png'}
+                alt="Site logo"
+                className={styles.logoCardImage}
+              />
+            </div>
+          </div>
+          <div className={`${styles.card} ${styles.detailsCard}`} style={{ gridColumn: 'span 8' }}>
+            <p className={styles.kicker}>Stag HQ</p>
+            <h1 className={styles.detailsTitle}>Stag Do Details</h1>
+            <p className={styles.detailsSubtitle}>Everything you need to know about the weekend</p>
+          </div>
           {homepageCards.map((pg) => {
             const spanVal = String(pg.gridSpan || 4).replace(/^span\s*/i, '');
             return (

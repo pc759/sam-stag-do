@@ -37,6 +37,45 @@
   text-align: center;
 }
 
+.logoCard {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.logoCardInner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logoCardImage {
+  max-width: 100%;
+  max-height: 160px;
+  object-fit: contain;
+  border-radius: 12px;
+}
+
+.detailsCard {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 1.5rem 2rem;
+}
+
+.detailsTitle {
+  margin: 0.3rem 0 0.4rem;
+  font-size: 2rem;
+  color: var(--card-heading);
+}
+
+.detailsSubtitle {
+  margin: 0;
+  color: var(--card-muted);
+  line-height: 1.5;
+}
+
 .fogLayer {
   position: absolute;
   inset: 0;
@@ -116,14 +155,14 @@ html[data-hero-fog='off'] .fogB {
 
 .kicker {
   display: inline-block;
-  background: rgba(255, 255, 255, 0.12);
-  color: var(--page-text);
+  background: #f3f4f6;
+  color: var(--card-muted);
   padding: 0.2rem 0.6rem;
   border-radius: 999px;
   font-size: 0.8rem;
   font-weight: 700;
   margin: 0 0 0.6rem;
-  border: 1px solid rgba(255, 255, 255, 0.22);
+  border: 1px solid #e5e7eb;
 }
 
 .hero h1 {

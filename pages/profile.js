@@ -1,32 +1,27 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
+import { useAuth } from '../contexts/AuthContext';
 import Layout from '../components/Layout';
 import styles from '../styles/Profile.module.css';
 
 export default function Profile() {
+  const { isAuthenticated, user: authUser, isLoading: authLoading } = useAuth();
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState(null);
   const [status, setStatus] = useState('');
+  const [dataLoading, setDataLoading] = useState(true);
 
   useEffect(() => {
-    const load = async () => {
-      const authRes = await fetch('/api/check-auth');
-      if (authRes.status === 401) {
-        router.push('/login');
-        return;
-      }
-      const authData = await authRes.json();
-      setIsAuthenticated(true);
-
+    if (authLoading) return;
+    if (!isAuthenticated) { router.push('/login'); return; }
+    const loadProfile = async () => {
       const profileRes = await fetch('/api/profile');
       const profile = await profileRes.json();
-      setUser({ ...authData.user, ...profile });
-      setIsLoading(false);
+      setUser({ ...authUser, ...profile });
+      setDataLoading(false);
     };
-    load();
-  }, [router]);
+    loadProfile();
+  }, [authLoading, isAuthenticated, authUser, router]);
 
   const saveProfile = async (e) => {
     e.preventDefault();
@@ -52,7 +47,7 @@ export default function Profile() {
     }
   };
 
-  if (isLoading) {
+  if (authLoading || dataLoading) {
     return <div className={styles.loading}>Loading...</div>;
   }
 
@@ -61,7 +56,7 @@ export default function Profile() {
   }
 
   return (
-    <Layout isAuthenticated={isAuthenticated} user={user}>
+    <Layout>
       <div className={styles.container}>
         <h1>Your Profile</h1>
         {user.tags && user.tags.length > 0 ? (

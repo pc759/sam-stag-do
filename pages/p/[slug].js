@@ -1,42 +1,33 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
+import { useAuth } from '../../contexts/AuthContext';
 import Layout from '../../components/Layout';
 import styles from '../../styles/Page.module.css';
 
 const MarkdownRenderer = dynamic(() => import('../../components/MarkdownRenderer'), { ssr: false });
 
 export default function DynamicPage() {
+  const { isAuthenticated, user, isLoading: authLoading } = useAuth();
   const router = useRouter();
   const { slug } = router.query;
-  const [isLoading, setIsLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState(null);
   const [page, setPage] = useState(null);
+  const [dataLoading, setDataLoading] = useState(true);
 
   useEffect(() => {
-    if (!slug) return;
-
+    if (!slug || authLoading) return;
+    if (!isAuthenticated) { router.push('/login'); return; }
     const load = async () => {
-      const authRes = await fetch('/api/check-auth');
-      if (authRes.status === 401) {
-        router.push('/login');
-        return;
-      }
-      const authData = await authRes.json();
-      setUser(authData.user);
-      setIsAuthenticated(true);
-
       const pageRes = await fetch(`/api/pages?slug=${encodeURIComponent(slug)}`);
       if (pageRes.ok) {
         setPage(await pageRes.json());
       }
-      setIsLoading(false);
+      setDataLoading(false);
     };
     load();
-  }, [slug, router]);
+  }, [slug, authLoading, isAuthenticated, router]);
 
-  if (isLoading) {
+  if (authLoading || dataLoading) {
     return <div className={styles.loading}>Loading&hellip;</div>;
   }
 
@@ -46,7 +37,7 @@ export default function DynamicPage() {
 
   if (!page) {
     return (
-      <Layout isAuthenticated={isAuthenticated} user={user}>
+      <Layout>
         <div className={styles.notFound}>
           <h1>Page not found</h1>
           <p>This page doesn&apos;t exist or hasn&apos;t been published yet.</p>
@@ -56,7 +47,7 @@ export default function DynamicPage() {
   }
 
   return (
-    <Layout isAuthenticated={isAuthenticated} user={user}>
+    <Layout>
       <div className={styles.container}>
         <div className={styles.contentCard}>
           <header className={styles.hero}>

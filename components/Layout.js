@@ -2,9 +2,11 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { useBranding } from '../contexts/BrandingContext';
+import { useAuth } from '../contexts/AuthContext';
 import styles from '../styles/Layout.module.css';
 
-export default function Layout({ children, isAuthenticated, user }) {
+export default function Layout({ children }) {
+  const { isAuthenticated, user } = useAuth();
   const router = useRouter();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const { branding } = useBranding();

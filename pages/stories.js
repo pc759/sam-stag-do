@@ -1,45 +1,33 @@
 import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
+import { useAuth } from '../contexts/AuthContext';
 import Layout from '../components/Layout';
 import styles from '../styles/Stories.module.css';
+import pageStyles from '../styles/Page.module.css';
 
 const MarkdownRenderer = dynamic(() => import('../components/MarkdownRenderer'), { ssr: false });
 
 export default function Stories() {
+  const { isAuthenticated, user, isLoading: authLoading } = useAuth();
   const router = useRouter();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [stories, setStories] = useState([]);
   const [author, setAuthor] = useState('');
   const [story, setStory] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitMessage, setSubmitMessage] = useState('');
   const [cmsPage, setCmsPage] = useState(null);
+  const [dataLoading, setDataLoading] = useState(true);
 
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const res = await fetch('/api/check-auth', { method: 'GET' });
-        if (res.status === 401) {
-          router.push('/login');
-        } else {
-          const authData = await res.json();
-          setIsAuthenticated(true);
-          setUser(authData.user);
-          fetchStories();
-          try { const cmsRes = await fetch('/api/pages?slug=stories'); if (cmsRes.ok) setCmsPage(await cmsRes.json()); } catch (e) { /* silent */ }
-        }
-      } catch (err) {
-        router.push('/login');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    checkAuth();
-  }, [router]);
+    if (authLoading) return;
+    if (!isAuthenticated) { router.push('/login'); return; }
+    fetchStories();
+    (async () => {
+      try { const cmsRes = await fetch('/api/pages?slug=stories'); if (cmsRes.ok) setCmsPage(await cmsRes.json()); } catch (e) { /* silent */ }
+      setDataLoading(false);
+    })();
+  }, [authLoading, isAuthenticated, router]);
 
   const fetchStories = async () => {
     try {
@@ -64,22 +52,22 @@ export default function Stories() {
       });
 
       if (res.ok) {
-        setSubmitMessage('✓ Story added! Thanks for the laugh.');
+        setSubmitMessage('\u2713 Story added! Thanks for the laugh.');
         setAuthor('');
         setStory('');
         fetchStories();
         setTimeout(() => setSubmitMessage(''), 3000);
       } else {
-        setSubmitMessage('✗ Failed to add story. Try again.');
+        setSubmitMessage('\u2717 Failed to add story. Try again.');
       }
     } catch (err) {
-      setSubmitMessage('✗ Something went wrong.');
+      setSubmitMessage('\u2717 Something went wrong.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  if (isLoading) {
+  if (authLoading || dataLoading) {
     return <div className={styles.loading}>Loading...</div>;
   }
 
@@ -88,15 +76,17 @@ export default function Stories() {
   }
 
   return (
-    <Layout isAuthenticated={isAuthenticated} user={user}>
+    <Layout>
       <div className={styles.container}>
-        <h1>{cmsPage?.title || "Sam's Questionable Choices"}</h1>
-        <p className={styles.subtitle}>
-          {cmsPage?.subtitle || "A repository of embarrassing stories and moments we'll never let him forget"}
-        </p>
-        {cmsPage?.body?.trim() && (
-          <div style={{marginBottom:'1.5rem',background:'#fff',border:'1px solid #e5e7eb',borderRadius:'14px',padding:'1.5rem 2rem',color:'#1f2937',boxShadow:'0 8px 22px rgba(17,24,39,0.08)'}}><MarkdownRenderer content={cmsPage.body} /></div>
-        )}
+        <div className={pageStyles.contentCard}>
+          <h1>{cmsPage?.title || "Sam's Questionable Choices"}</h1>
+          <p className={styles.subtitle}>
+            {cmsPage?.subtitle || "A repository of embarrassing stories and moments we'll never let him forget"}
+          </p>
+          {cmsPage?.body?.trim() && (
+            <div className={pageStyles.prose}><MarkdownRenderer content={cmsPage.body} /></div>
+          )}
+        </div>
 
         <div className={styles.formSection}>
           <h2>Add Your Story</h2>
@@ -128,7 +118,7 @@ export default function Stories() {
             </div>
 
             {submitMessage && (
-              <div className={`${styles.message} ${submitMessage.startsWith('✓') ? styles.success : styles.error}`}>
+              <div className={`${styles.message} ${submitMessage.startsWith('\u2713') ? styles.success : styles.error}`}>
                 {submitMessage}
               </div>
             )}

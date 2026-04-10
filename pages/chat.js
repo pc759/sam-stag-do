@@ -1,16 +1,16 @@
 import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
+import { useAuth } from '../contexts/AuthContext';
 import Layout from '../components/Layout';
 import styles from '../styles/Chat.module.css';
+import pageStyles from '../styles/Page.module.css';
 
 const MarkdownRenderer = dynamic(() => import('../components/MarkdownRenderer'), { ssr: false });
 
 export default function ChatPage() {
+  const { isAuthenticated, user, isLoading: authLoading } = useAuth();
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState(null);
   const [chatEnabled, setChatEnabled] = useState(true);
   const [messages, setMessages] = useState([
     {
@@ -23,33 +23,27 @@ export default function ChatPage() {
   const [error, setError] = useState('');
   const [conversationId, setConversationId] = useState(null);
   const [cmsPage, setCmsPage] = useState(null);
+  const [dataLoading, setDataLoading] = useState(true);
 
   useEffect(() => {
-    const load = async () => {
+    if (authLoading) return;
+    if (!isAuthenticated) { router.push('/login'); return; }
+    const loadData = async () => {
       try {
-        const authRes = await fetch('/api/check-auth');
-        if (authRes.status === 401) {
-          router.push('/login');
-          return;
-        }
-        const authData = await authRes.json();
-        setIsAuthenticated(true);
-        setUser(authData.user);
-
         const contentRes = await fetch('/api/site-content');
         if (contentRes.ok) {
           const content = await contentRes.json();
           setChatEnabled((content.chatEnabled || 'true').toLowerCase() === 'true');
-          try { const cmsRes = await fetch('/api/pages?slug=chat'); if (cmsRes.ok) setCmsPage(await cmsRes.json()); } catch (e) { /* silent */ }
         }
+        try { const cmsRes = await fetch('/api/pages?slug=chat'); if (cmsRes.ok) setCmsPage(await cmsRes.json()); } catch (e) { /* silent */ }
       } catch (err) {
-        router.push('/login');
+        // silent
       } finally {
-        setIsLoading(false);
+        setDataLoading(false);
       }
     };
-    load();
-  }, [router]);
+    loadData();
+  }, [authLoading, isAuthenticated, router]);
 
   const sendMessage = async (e) => {
     e.preventDefault();
@@ -87,35 +81,37 @@ export default function ChatPage() {
     }
   };
 
-  if (isLoading) return <div className={styles.loading}>Loading...</div>;
+  if (authLoading || dataLoading) return <div className={styles.loading}>Loading...</div>;
   if (!isAuthenticated) return null;
 
   return (
-    <Layout isAuthenticated={isAuthenticated} user={user}>
+    <Layout>
       <div className={styles.container}>
-        <div className={styles.chatHeader}>
-          <h1>{cmsPage?.title || 'Dear Stagony Aunt'}</h1>
-          <button
-            type="button"
-            className={styles.newChatBtn}
-            onClick={() => {
-              setConversationId(null);
-              setMessages([
-                {
-                  role: 'assistant',
-                  text: "Troubled soul, unburden yourself... tell me about Sam's sins and I shall dispense wisdom, judgment, and probably ridicule."
-                }
-              ]);
-              setError('');
-            }}
-            disabled={!chatEnabled || isSending}
-          >
-            New conversation
-          </button>
+        <div className={pageStyles.contentCard}>
+          <div className={styles.chatHeader}>
+            <h1>{cmsPage?.title || 'Dear Stagony Aunt'}</h1>
+            <button
+              type="button"
+              className={styles.newChatBtn}
+              onClick={() => {
+                setConversationId(null);
+                setMessages([
+                  {
+                    role: 'assistant',
+                    text: "Troubled soul, unburden yourself... tell me about Sam's sins and I shall dispense wisdom, judgment, and probably ridicule."
+                  }
+                ]);
+                setError('');
+              }}
+              disabled={!chatEnabled || isSending}
+            >
+              New conversation
+            </button>
+          </div>
+          {cmsPage?.body?.trim() && (
+            <div className={pageStyles.prose}><MarkdownRenderer content={cmsPage.body} /></div>
+          )}
         </div>
-        {cmsPage?.body?.trim() && (
-          <div style={{marginBottom:'1rem',background:'#fff',border:'1px solid #e5e7eb',borderRadius:'14px',padding:'1.5rem 2rem',color:'#1f2937',boxShadow:'0 8px 22px rgba(17,24,39,0.08)'}}><MarkdownRenderer content={cmsPage.body} /></div>
-        )}
         {!chatEnabled && (
           <p className={styles.disabled}>
             Chat is currently disabled by admin settings.

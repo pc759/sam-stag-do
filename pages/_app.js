@@ -1,10 +1,13 @@
 import '../styles/globals.css';
 import { BrandingProvider } from '../contexts/BrandingContext';
+import { AuthProvider } from '../contexts/AuthContext';
 
 function MyApp({ Component, pageProps }) {
   return (
     <BrandingProvider>
-      <Component {...pageProps} />
+      <AuthProvider>
+        <Component {...pageProps} />
+      </AuthProvider>
     </BrandingProvider>
   );
 }

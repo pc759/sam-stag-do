@@ -2,42 +2,36 @@ import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+import { useAuth } from '../contexts/AuthContext';
 import Layout from '../components/Layout';
 import styles from '../styles/Votes.module.css';
+import pageStyles from '../styles/Page.module.css';
 
 const MarkdownRenderer = dynamic(() => import('../components/MarkdownRenderer'), { ssr: false });
 
 export default function VotesList() {
+  const { isAuthenticated, user, isLoading: authLoading } = useAuth();
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState(null);
   const [votes, setVotes] = useState([]);
   const [cmsPage, setCmsPage] = useState(null);
+  const [dataLoading, setDataLoading] = useState(true);
 
   useEffect(() => {
-    const load = async () => {
-      const authRes = await fetch('/api/check-auth');
-      if (authRes.status === 401) {
-        router.push('/login');
-        return;
-      }
-      const authData = await authRes.json();
-      setUser(authData.user);
-      setIsAuthenticated(true);
-
+    if (authLoading) return;
+    if (!isAuthenticated) { router.push('/login'); return; }
+    const loadData = async () => {
       const res = await fetch('/api/votes');
       if (res.ok) {
         const data = await res.json();
         setVotes(data.votes || []);
       }
       try { const cmsRes = await fetch('/api/pages?slug=votes'); if (cmsRes.ok) setCmsPage(await cmsRes.json()); } catch (e) { /* silent */ }
-      setIsLoading(false);
+      setDataLoading(false);
     };
-    load();
-  }, [router]);
+    loadData();
+  }, [authLoading, isAuthenticated, router]);
 
-  if (isLoading) {
+  if (authLoading || dataLoading) {
     return <div className={styles.loading}>Loading…</div>;
   }
 
@@ -46,15 +40,17 @@ export default function VotesList() {
   }
 
   return (
-    <Layout isAuthenticated={isAuthenticated} user={user}>
+    <Layout>
       <div className={styles.container}>
-        <h1>{cmsPage?.title || 'Votes'}</h1>
-        <p className={styles.intro}>
-          {cmsPage?.subtitle || "Cast your vote while a round is open. You won't see who anyone else voted for. After a vote closes, everyone sees totals only."}
-        </p>
-        {cmsPage?.body?.trim() && (
-          <div style={{marginBottom:'1.5rem',background:'#fff',border:'1px solid #e5e7eb',borderRadius:'14px',padding:'1.5rem 2rem',color:'#1f2937',boxShadow:'0 8px 22px rgba(17,24,39,0.08)'}}><MarkdownRenderer content={cmsPage.body} /></div>
-        )}
+        <div className={pageStyles.contentCard}>
+          <h1>{cmsPage?.title || 'Votes'}</h1>
+          <p className={styles.intro}>
+            {cmsPage?.subtitle || "Cast your vote while a round is open. You won\u2019t see who anyone else voted for. After a vote closes, everyone sees totals only."}
+          </p>
+          {cmsPage?.body?.trim() && (
+            <div className={pageStyles.prose}><MarkdownRenderer content={cmsPage.body} /></div>
+          )}
+        </div>
         {votes.length === 0 ? (
           <p>No votes yet.</p>
         ) : (

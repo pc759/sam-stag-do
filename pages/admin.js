@@ -6,6 +6,7 @@ import Layout from '../components/Layout';
 import ColorField from '../components/ColorField';
 import { useBranding } from '../contexts/BrandingContext';
 import { defaultContent } from '../lib/siteContent';
+import { useAuth } from '../contexts/AuthContext';
 import styles from '../styles/Admin.module.css';
 
 const KittyQuill = dynamic(() => import('../components/KittyQuill'), { ssr: false });
@@ -25,9 +26,8 @@ const TAB_IDS = new Set(TABS.map((t) => t.id));
 export default function Admin() {
 const router = useRouter();
 const { refreshBranding } = useBranding();
-const [isAuthenticated, setIsAuthenticated] = useState(false);
-const [user, setUser] = useState(null);
-const [isLoading, setIsLoading] = useState(true);
+const { isAuthenticated, user, isLoading: authLoading } = useAuth();
+const [dataLoading, setDataLoading] = useState(true);
 const [content, setContent] = useState({ ...defaultContent });
 const [stories, setStories] = useState([]);
 const [users, setUsers] = useState([]);
@@ -273,28 +273,18 @@ setAdminPayments(await res.json());
 };
 
 useEffect(() => {
+if (authLoading) return;
+if (!isAuthenticated) { router.push('/login'); return; }
+if (!user?.isAdmin) { router.push('/'); return; }
 const init = async () => {
 try {
-const authRes = await fetch('/api/check-auth', { method: 'GET' });
-if (authRes.status === 401) {
-router.push('/login');
-return;
-}
-const authData = await authRes.json();
-if (!authData.user?.isAdmin) {
-router.push('/');
-return;
-}
-
-setIsAuthenticated(true);
-setUser(authData.user);
 await Promise.all([fetchContent(), fetchStories(), fetchUsers(), fetchTags()]);
 } finally {
-setIsLoading(false);
+setDataLoading(false);
 }
 };
 init();
-}, [router]);
+}, [authLoading, isAuthenticated, user, router]);
 const addSplitRow = () => {
 setExpenseForm((prev) => ({ ...prev, splits: [...prev.splits, { userId: '', amount: '' }] }));
 };
@@ -720,7 +710,7 @@ useEffect(() => {
     fetchRosterUsers();
   };
 
-  if (isLoading) {
+  if (authLoading || dataLoading) {
     return <div className={styles.loading}>Loading...</div>;
   }
 
@@ -729,7 +719,7 @@ useEffect(() => {
   }
 
   return (
-    <Layout isAuthenticated={isAuthenticated} user={user}>
+    <Layout>
       <div className={styles.container}>
         <h1>Admin CMS</h1>
         <p className={styles.subtitle}>Manage content, attendees, passwords, and gamer-tag badges.</p>

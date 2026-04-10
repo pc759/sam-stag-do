@@ -1,50 +1,39 @@
 import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
+import { useAuth } from '../contexts/AuthContext';
 import Layout from '../components/Layout';
 import styles from '../styles/TraitorBoard.module.css';
+import pageStyles from '../styles/Page.module.css';
 
 const MarkdownRenderer = dynamic(() => import('../components/MarkdownRenderer'), { ssr: false });
 
 export default function TraitorBoard() {
+  const { isAuthenticated, user, isLoading: authLoading } = useAuth();
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState(null);
   const [posts, setPosts] = useState([]);
   const [body, setBody] = useState('');
   const [sending, setSending] = useState(false);
   const [cmsPage, setCmsPage] = useState(null);
+  const [dataLoading, setDataLoading] = useState(true);
 
   useEffect(() => {
-    const load = async () => {
-      const authRes = await fetch('/api/check-auth');
-      if (authRes.status === 401) {
-        router.push('/login');
-        return;
-      }
-      const authData = await authRes.json();
-      if (!authData.user?.traitorChannelAccess) {
-        router.push('/');
-        return;
-      }
-      setUser(authData.user);
-      setIsAuthenticated(true);
-      try { const cmsRes = await fetch('/api/pages?slug=traitor-board'); if (cmsRes.ok) setCmsPage(await cmsRes.json()); } catch (e) { /* silent */ }
+    if (authLoading) return;
+    if (!isAuthenticated) { router.push('/login'); return; }
+    if (!user?.traitorChannelAccess) { router.push('/'); return; }
 
+    const loadData = async () => {
+      try { const cmsRes = await fetch('/api/pages?slug=traitor-board'); if (cmsRes.ok) setCmsPage(await cmsRes.json()); } catch (e) { /* silent */ }
       const res = await fetch('/api/traitor-board');
-      if (res.status === 403) {
-        router.push('/');
-        return;
-      }
+      if (res.status === 403) { router.push('/'); return; }
       if (res.ok) {
         const data = await res.json();
         setPosts(data.posts || []);
       }
-      setIsLoading(false);
+      setDataLoading(false);
     };
-    load();
-  }, [router]);
+    loadData();
+  }, [authLoading, isAuthenticated, user, router]);
 
   const send = async (e) => {
     e.preventDefault();
@@ -67,8 +56,8 @@ export default function TraitorBoard() {
     setSending(false);
   };
 
-  if (isLoading) {
-    return <div className={styles.loading}>Loading…</div>;
+  if (authLoading || dataLoading) {
+    return <div className={styles.loading}>Loading\u2026</div>;
   }
 
   if (!isAuthenticated) {
@@ -76,24 +65,26 @@ export default function TraitorBoard() {
   }
 
   return (
-    <Layout isAuthenticated={isAuthenticated} user={user}>
+    <Layout>
       <div className={styles.container}>
-        <h1>{cmsPage?.title || "Traitors' channel"}</h1>
-        <p className={styles.hint}>
-          {cmsPage?.subtitle || "Private to players with the traitor tag. Don't share your screen with faithfuls."}
-        </p>
-        {cmsPage?.body?.trim() && (
-          <div style={{marginBottom:'1rem',background:'#fff',border:'1px solid #e5e7eb',borderRadius:'14px',padding:'1.5rem 2rem',color:'#1f2937',boxShadow:'0 8px 22px rgba(17,24,39,0.08)'}}><MarkdownRenderer content={cmsPage.body} /></div>
-        )}
+        <div className={pageStyles.contentCard}>
+          <h1>{cmsPage?.title || "Traitors' channel"}</h1>
+          <p className={styles.hint}>
+            {cmsPage?.subtitle || "Private to players with the traitor tag. Don't share your screen with faithfuls."}
+          </p>
+          {cmsPage?.body?.trim() && (
+            <div className={pageStyles.prose}><MarkdownRenderer content={cmsPage.body} /></div>
+          )}
+        </div>
         <form className={styles.composer} onSubmit={send}>
           <textarea
             value={body}
             onChange={(e) => setBody(e.target.value)}
-            placeholder="Message the other traitors…"
+            placeholder="Message the other traitors\u2026"
             maxLength={8000}
           />
           <button type="submit" disabled={sending || !body.trim()}>
-            {sending ? 'Sending…' : 'Post'}
+            {sending ? 'Sending\u2026' : 'Post'}
           </button>
         </form>
         <div className={styles.posts}>
@@ -101,7 +92,7 @@ export default function TraitorBoard() {
             <article key={p.id} className={styles.post}>
               <header>
                 <strong>{p.authorName}</strong>
-                <span> · {new Date(p.createdAt).toLocaleString()}</span>
+                <span> \u00b7 {new Date(p.createdAt).toLocaleString()}</span>
               </header>
               <p>{p.body}</p>
             </article>

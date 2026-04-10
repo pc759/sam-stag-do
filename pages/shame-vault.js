@@ -1,31 +1,19 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+import { useAuth } from '../contexts/AuthContext';
 import Layout from '../components/Layout';
 import styles from '../styles/ShameVault.module.css';
 
 export default function ShameVault() {
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState(null);
 
   useEffect(() => {
-    const load = async () => {
-      const authRes = await fetch('/api/check-auth');
-      if (authRes.status === 401) {
-        router.push('/login');
-        return;
-      }
-      const authData = await authRes.json();
-      setIsAuthenticated(true);
-      setUser(authData.user);
-      setIsLoading(false);
-    };
-    load();
-  }, [router]);
+    if (!authLoading && !isAuthenticated) router.push('/login');
+  }, [authLoading, isAuthenticated, router]);
 
-  if (isLoading) {
+  if (authLoading) {
     return <div className={styles.loading}>Loading...</div>;
   }
 
@@ -34,7 +22,7 @@ export default function ShameVault() {
   }
 
   return (
-    <Layout isAuthenticated={isAuthenticated} user={user}>
+    <Layout>
       <div className={styles.container}>
         <header className={styles.hero}>
           <h1>Shame Vault</h1>

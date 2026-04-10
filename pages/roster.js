@@ -1,34 +1,27 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+import { useAuth } from '../contexts/AuthContext';
 import Layout from '../components/Layout';
 import styles from '../styles/Roster.module.css';
 
 export default function Roster() {
+  const { isAuthenticated, user, isLoading: authLoading } = useAuth();
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState(null);
   const [attendees, setAttendees] = useState([]);
   const [newUser, setNewUser] = useState({ name: '', mobile: '', password: '' });
   const [status, setStatus] = useState('');
+  const [dataLoading, setDataLoading] = useState(true);
 
   useEffect(() => {
-    const load = async () => {
-      const authRes = await fetch('/api/check-auth');
-      if (authRes.status === 401) {
-        router.push('/login');
-        return;
-      }
-      const authData = await authRes.json();
-      setUser(authData.user);
-      setIsAuthenticated(true);
-
+    if (authLoading) return;
+    if (!isAuthenticated) { router.push('/login'); return; }
+    const loadData = async () => {
       await fetchRoster();
-      setIsLoading(false);
+      setDataLoading(false);
     };
-    load();
-  }, [router]);
+    loadData();
+  }, [authLoading, isAuthenticated, router]);
 
   const fetchRoster = async () => {
     const rosterRes = await fetch('/api/roster');
@@ -55,7 +48,7 @@ export default function Roster() {
     setStatus('Could not add attendee. Check mobile uniqueness.');
   };
 
-  if (isLoading) {
+  if (authLoading || dataLoading) {
     return <div className={styles.loading}>Loading...</div>;
   }
 
@@ -64,7 +57,7 @@ export default function Roster() {
   }
 
   return (
-    <Layout isAuthenticated={isAuthenticated} user={user}>
+    <Layout>
       <div className={styles.container}>
         <h1>Attendee Roster</h1>
 

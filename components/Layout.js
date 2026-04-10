@@ -13,6 +13,7 @@ export default function Layout({ children }) {
   const siteTitle = branding?.homeTitle || "Sam's Stag Do";
   const logoUrl = (branding?.siteLogoUrl || '').trim() || '/brand/logo.png';
   const [navTree, setNavTree] = useState([]);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -55,7 +56,10 @@ export default function Layout({ children }) {
               />
             </span>
           </Link>
-          <div className={styles.navLinks}>
+          <button className={styles.hamburger} onClick={() => setMenuOpen(!menuOpen)} aria-label="Toggle menu">
+            {menuOpen ? '\u2715' : '\u2630'}
+          </button>
+          <div className={`${styles.navLinks} ${menuOpen ? styles.navOpen : ''}`}>
             {navTree.map((item) =>
               item.children && item.children.length > 0 ? (
                 <div key={item.id} className={styles.navDropdown}>
@@ -93,6 +97,7 @@ export default function Layout({ children }) {
               <Link
                 href="/traitor-board"
                 className={`${styles.navLink} ${isActive('/traitor-board') ? styles.active : ''}`}
+              onClick={() => setMenuOpen(false)}
               >
                 Traitors
               </Link>
@@ -101,6 +106,7 @@ export default function Layout({ children }) {
               <Link
                 href="/admin"
                 className={`${styles.navLink} ${isActive('/admin') ? styles.active : ''}`}
+              onClick={() => setMenuOpen(false)}
               >
                 Admin
               </Link>

@@ -69,18 +69,21 @@ export default function StagDetailsPage() {
         </div>
 
         <div className={styles.bento}>
-          {homepageCards.map((pg) => (
+          {homepageCards.map((pg) => {
+            const spanVal = String(pg.gridSpan || 4).replace(/^span\s*/i, '');
+            return (
             <Link
               key={pg.id}
               href={`/p/${pg.slug}`}
               className={styles.card}
-              style={{ gridColumn: `span ${pg.gridSpan || 4}`, textDecoration: 'none', color: 'inherit' }}
+              style={{ gridColumn: `span ${spanVal}`, textDecoration: 'none', color: 'inherit' }}
             >
               {pg.icon && <div className={styles.icon}>{pg.icon}</div>}
               <h2>{pg.title}</h2>
               {pg.subtitle && <p>{pg.subtitle}</p>}
             </Link>
-          ))}
+            );
+          })}
 
           {/* Who card — full width at bottom */}
           <section className={`${styles.card} ${styles.whoCard}`}>

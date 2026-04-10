@@ -315,18 +315,17 @@ html[data-hero-fog='off'] .fogB {
   font-weight: 700;
 }
 
-@media (max-width: 1024px) {
-  .whenCard,
-  .whereCard,
-  .costCard {
-    grid-column: span 4;
+@media (max-width: 900px) {
+  .bento {
+    grid-template-columns: repeat(2, 1fr);
   }
 
-  .whoCard,
-  .bringCard,
-  .itineraryCard,
-  .questionsCard {
-    grid-column: span 12;
+  .bento > * {
+    grid-column: span 1 !important;
+  }
+
+  .whoCard {
+    grid-column: 1 / -1 !important;
   }
 }
 
@@ -336,17 +335,10 @@ html[data-hero-fog='off'] .fogB {
   }
 
   .bento {
-    grid-template-columns: repeat(1, minmax(0, 1fr));
+    grid-template-columns: 1fr;
   }
 
-  .card,
-  .whenCard,
-  .whereCard,
-  .costCard,
-  .whoCard,
-  .bringCard,
-  .itineraryCard,
-  .questionsCard {
-    grid-column: span 1;
+  .bento > * {
+    grid-column: span 1 !important;
   }
 }

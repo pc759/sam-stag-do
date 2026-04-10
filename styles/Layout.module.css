@@ -199,6 +199,17 @@
   cursor: not-allowed;
 }
 
+.hamburger {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--chrome-text);
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  line-height: 1;
+}
+
 .main {
   flex: 1;
   max-width: 1200px;
@@ -222,40 +233,56 @@
 }
 
 @media (max-width: 768px) {
+  .hamburger {
+    display: block;
+  }
+
   .navContent {
-    flex-direction: column;
-    gap: 1rem;
+    flex-wrap: wrap;
   }
 
   .navLinks {
+    display: none;
     flex-direction: column;
-    gap: 0.75rem;
     width: 100%;
+    gap: 0.25rem;
+    order: 3;
+  }
+
+  .navLinks.navOpen {
+    display: flex;
   }
 
   .navUser {
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
-    width: 100%;
+    gap: 0.5rem;
   }
 
   .navLink {
     display: block;
-    text-align: center;
+    text-align: left;
+    padding: 0.6rem 1rem;
+  }
+
+  .navDropdownTrigger {
+    display: flex;
+    width: 100%;
   }
 
   .navDropdownMenu {
     position: static;
-    background: rgba(0, 0, 0, 0.1);
+    background: rgba(0, 0, 0, 0.15);
     box-shadow: none;
     backdrop-filter: none;
     border-radius: 4px;
     margin-top: 0.25rem;
-    display: block;
+    display: none;
   }
 
-  .navDropdownTrigger {
-    display: none;
+  .navDropdown:hover .navDropdownMenu,
+  .navDropdown:focus-within .navDropdownMenu {
+    display: block;
   }
 
   .main {

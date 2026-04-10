@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react';
+import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
 import Layout from '../components/Layout';
 import styles from '../styles/Stories.module.css';
+
+const MarkdownRenderer = dynamic(() => import('../components/MarkdownRenderer'), { ssr: false });
 
 export default function Stories() {
   const router = useRouter();
@@ -13,6 +16,7 @@ export default function Stories() {
   const [story, setStory] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitMessage, setSubmitMessage] = useState('');
+  const [cmsPage, setCmsPage] = useState(null);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -25,6 +29,7 @@ export default function Stories() {
           setIsAuthenticated(true);
           setUser(authData.user);
           fetchStories();
+          try { const cmsRes = await fetch('/api/pages?slug=stories'); if (cmsRes.ok) setCmsPage(await cmsRes.json()); } catch (e) { /* silent */ }
         }
       } catch (err) {
         router.push('/login');
@@ -85,10 +90,13 @@ export default function Stories() {
   return (
     <Layout isAuthenticated={isAuthenticated} user={user}>
       <div className={styles.container}>
-        <h1>Sam&apos;s Questionable Choices</h1>
+        <h1>{cmsPage?.title || "Sam's Questionable Choices"}</h1>
         <p className={styles.subtitle}>
-          A repository of embarrassing stories and moments we&apos;ll never let him forget
+          {cmsPage?.subtitle || "A repository of embarrassing stories and moments we'll never let him forget"}
         </p>
+        {cmsPage?.body?.trim() && (
+          <div style={{marginBottom:'1.5rem'}}><MarkdownRenderer content={cmsPage.body} /></div>
+        )}
 
         <div className={styles.formSection}>
           <h2>Add Your Story</h2>

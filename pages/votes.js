@@ -1,8 +1,11 @@
 import { useEffect, useState } from 'react';
+import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import Layout from '../components/Layout';
 import styles from '../styles/Votes.module.css';
+
+const MarkdownRenderer = dynamic(() => import('../components/MarkdownRenderer'), { ssr: false });
 
 export default function VotesList() {
   const router = useRouter();
@@ -10,6 +13,7 @@ export default function VotesList() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState(null);
   const [votes, setVotes] = useState([]);
+  const [cmsPage, setCmsPage] = useState(null);
 
   useEffect(() => {
     const load = async () => {
@@ -27,6 +31,7 @@ export default function VotesList() {
         const data = await res.json();
         setVotes(data.votes || []);
       }
+      try { const cmsRes = await fetch('/api/pages?slug=votes'); if (cmsRes.ok) setCmsPage(await cmsRes.json()); } catch (e) { /* silent */ }
       setIsLoading(false);
     };
     load();
@@ -43,11 +48,13 @@ export default function VotesList() {
   return (
     <Layout isAuthenticated={isAuthenticated} user={user}>
       <div className={styles.container}>
-        <h1>Votes</h1>
+        <h1>{cmsPage?.title || 'Votes'}</h1>
         <p className={styles.intro}>
-          Cast your vote while a round is open. You won&apos;t see who anyone else voted for. After a vote
-          closes, everyone sees totals only.
+          {cmsPage?.subtitle || "Cast your vote while a round is open. You won't see who anyone else voted for. After a vote closes, everyone sees totals only."}
         </p>
+        {cmsPage?.body?.trim() && (
+          <div style={{marginBottom:'1.5rem'}}><MarkdownRenderer content={cmsPage.body} /></div>
+        )}
         {votes.length === 0 ? (
           <p>No votes yet.</p>
         ) : (

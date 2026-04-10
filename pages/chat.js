@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react';
+import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
 import Layout from '../components/Layout';
 import styles from '../styles/Chat.module.css';
+
+const MarkdownRenderer = dynamic(() => import('../components/MarkdownRenderer'), { ssr: false });
 
 export default function ChatPage() {
   const router = useRouter();
@@ -19,6 +22,7 @@ export default function ChatPage() {
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState('');
   const [conversationId, setConversationId] = useState(null);
+  const [cmsPage, setCmsPage] = useState(null);
 
   useEffect(() => {
     const load = async () => {
@@ -36,6 +40,7 @@ export default function ChatPage() {
         if (contentRes.ok) {
           const content = await contentRes.json();
           setChatEnabled((content.chatEnabled || 'true').toLowerCase() === 'true');
+          try { const cmsRes = await fetch('/api/pages?slug=chat'); if (cmsRes.ok) setCmsPage(await cmsRes.json()); } catch (e) { /* silent */ }
         }
       } catch (err) {
         router.push('/login');
@@ -89,7 +94,7 @@ export default function ChatPage() {
     <Layout isAuthenticated={isAuthenticated} user={user}>
       <div className={styles.container}>
         <div className={styles.chatHeader}>
-          <h1>Dear Stagony Aunt</h1>
+          <h1>{cmsPage?.title || 'Dear Stagony Aunt'}</h1>
           <button
             type="button"
             className={styles.newChatBtn}
@@ -108,6 +113,9 @@ export default function ChatPage() {
             New conversation
           </button>
         </div>
+        {cmsPage?.body?.trim() && (
+          <div style={{marginBottom:'1rem'}}><MarkdownRenderer content={cmsPage.body} /></div>
+        )}
         {!chatEnabled && (
           <p className={styles.disabled}>
             Chat is currently disabled by admin settings.

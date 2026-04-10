@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react';
+import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
 import Layout from '../components/Layout';
 import styles from '../styles/TraitorBoard.module.css';
+
+const MarkdownRenderer = dynamic(() => import('../components/MarkdownRenderer'), { ssr: false });
 
 export default function TraitorBoard() {
   const router = useRouter();
@@ -11,6 +14,7 @@ export default function TraitorBoard() {
   const [posts, setPosts] = useState([]);
   const [body, setBody] = useState('');
   const [sending, setSending] = useState(false);
+  const [cmsPage, setCmsPage] = useState(null);
 
   useEffect(() => {
     const load = async () => {
@@ -26,6 +30,7 @@ export default function TraitorBoard() {
       }
       setUser(authData.user);
       setIsAuthenticated(true);
+      try { const cmsRes = await fetch('/api/pages?slug=traitor-board'); if (cmsRes.ok) setCmsPage(await cmsRes.json()); } catch (e) { /* silent */ }
 
       const res = await fetch('/api/traitor-board');
       if (res.status === 403) {
@@ -73,10 +78,13 @@ export default function TraitorBoard() {
   return (
     <Layout isAuthenticated={isAuthenticated} user={user}>
       <div className={styles.container}>
-        <h1>Traitors&apos; channel</h1>
+        <h1>{cmsPage?.title || "Traitors' channel"}</h1>
         <p className={styles.hint}>
-          Private to players with the traitor tag. Don&apos;t share your screen with faithfuls.
+          {cmsPage?.subtitle || "Private to players with the traitor tag. Don't share your screen with faithfuls."}
         </p>
+        {cmsPage?.body?.trim() && (
+          <div style={{marginBottom:'1rem'}}><MarkdownRenderer content={cmsPage.body} /></div>
+        )}
         <form className={styles.composer} onSubmit={send}>
           <textarea
             value={body}

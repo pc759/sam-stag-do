@@ -178,7 +178,7 @@ html[data-hero-fog='off'] .fogB {
 }
 
 .whoCard {
-  grid-column: span 6;
+  grid-column: 1 / -1;
 }
 
 .bringCard,

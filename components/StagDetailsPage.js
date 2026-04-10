@@ -1,64 +1,47 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+import { useAuth } from '../contexts/AuthContext';
 import Layout from './Layout';
 import styles from '../styles/Details.module.css';
 import { defaultContent } from '../lib/siteContent';
 
 export default function StagDetailsPage() {
+  const { isAuthenticated, user, isLoading: authLoading } = useAuth();
   const router = useRouter();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [content, setContent] = useState(defaultContent);
   const [attendingUsers, setAttendingUsers] = useState([]);
   const [cmsPages, setCmsPages] = useState([]);
+  const [dataLoading, setDataLoading] = useState(true);
 
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const res = await fetch('/api/check-auth', { method: 'GET' });
-        if (res.status === 401) {
-          router.push('/login');
-        } else {
-          const authData = await res.json();
-          setIsAuthenticated(true);
-          setUser(authData.user);
+    if (authLoading) return;
+    if (!isAuthenticated) { router.push('/login'); return; }
 
-          const [contentRes, rosterRes] = await Promise.all([
-            fetch('/api/site-content'),
-            fetch('/api/roster')
-          ]);
+    const loadData = async () => {
+      const [contentRes, rosterRes, pagesRes] = await Promise.all([
+        fetch('/api/site-content'),
+        fetch('/api/roster'),
+        fetch('/api/pages')
+      ]);
 
-          if (contentRes.ok) {
-            const contentData = await contentRes.json();
-            setContent(contentData);
-          }
+      if (contentRes.ok) setContent(await contentRes.json());
 
-          if (rosterRes.ok) {
-            const roster = await rosterRes.json();
-            const attending = roster.filter((attendee) =>
-              (attendee.tags || []).some((tag) => tag.name?.toLowerCase() === 'attending')
-            );
-            setAttendingUsers(attending);
-          }
-
-          const pagesRes = await fetch('/api/pages');
-          if (pagesRes.ok) {
-            setCmsPages(await pagesRes.json());
-          }
-        }
-      } catch (err) {
-        router.push('/login');
-      } finally {
-        setIsLoading(false);
+      if (rosterRes.ok) {
+        const roster = await rosterRes.json();
+        setAttendingUsers(
+          roster.filter((a) => (a.tags || []).some((t) => t.name?.toLowerCase() === 'attending'))
+        );
       }
+
+      if (pagesRes.ok) setCmsPages(await pagesRes.json());
+
+      setDataLoading(false);
     };
+    loadData();
+  }, [authLoading, isAuthenticated, router]);
 
-    checkAuth();
-  }, [router]);
-
-  if (isLoading) {
+  if (authLoading || dataLoading) {
     return <div className={styles.loading}>Loading...</div>;
   }
 
@@ -71,7 +54,7 @@ export default function StagDetailsPage() {
     .sort((a, b) => (a.homepageOrder || 0) - (b.homepageOrder || 0));
 
   return (
-    <Layout isAuthenticated={isAuthenticated} user={user}>
+    <Layout>
       <div className={styles.container}>
         <div className={styles.heroWrap}>
           <div className={styles.fogLayer} aria-hidden="true">
@@ -86,7 +69,6 @@ export default function StagDetailsPage() {
         </div>
 
         <div className={styles.bento}>
-          {/* Dynamic CMS cards */}
           {homepageCards.map((pg) => (
             <Link
               key={pg.id}
@@ -100,7 +82,7 @@ export default function StagDetailsPage() {
             </Link>
           ))}
 
-          {/* Built-in Who card (uses live attendee data) */}
+          {/* Who card — full width at bottom */}
           <section className={`${styles.card} ${styles.whoCard}`}>
             <div className={styles.icon}>👥</div>
             <h2>Who</h2>
@@ -127,22 +109,6 @@ export default function StagDetailsPage() {
               )}
             </div>
           </section>
-
-          {/* Nav-only pages (not on homepage but published) */}
-          {cmsPages.filter((p) => !p.showOnHomepage).length > 0 && (
-            <section className={`${styles.card} ${styles.pagesCard}`}>
-              <h2>More to explore</h2>
-              <div className={styles.pagesGrid}>
-                {cmsPages.filter((p) => !p.showOnHomepage).map((pg) => (
-                  <Link key={pg.id} href={`/p/${pg.slug}`} className={styles.pageLink}>
-                    {pg.icon && <span className={styles.pageIcon}>{pg.icon}</span>}
-                    <strong>{pg.title}</strong>
-                    {pg.subtitle && <p className={styles.pageSub}>{pg.subtitle}</p>}
-                  </Link>
-                ))}
-              </div>
-            </section>
-          )}
         </div>
       </div>
     </Layout>
